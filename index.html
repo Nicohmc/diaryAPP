@@ -140,6 +140,7 @@ nav button[aria-current="page"]{color:var(--ink); background:var(--bg)}
 .out .b{top:20px; border-radius:0 0 20px 20px; background:var(--cc)}
 .chips{display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:16px 0 10px}
 .chip{border:2px solid var(--line); background:var(--surface); border-radius:999px; padding:4px 12px; cursor:pointer; font-size:.9rem}
+.chip.emo{font-size:1.05rem; padding:3px 11px}
 .chip[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
 .result{max-width:360px; margin:16px auto 0; animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.6); opacity:0}}
@@ -282,6 +283,8 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
         </div>
       </div>
       <div class="chips" id="gachaChips"></div>
+      <p class="muted" id="gachaEmoLabel" style="text-align:center; font-size:.85rem; margin:-2px 0 0">或指定想重溫的心情（可複選）</p>
+      <div class="chips" id="gachaEmojis" style="margin-top:8px"></div>
       <div style="text-align:center"><button class="btn main" id="spin">轉一下</button></div>
       <div id="gachaResult"></div>
     </div>
@@ -785,7 +788,7 @@ $("rcSave").onclick = async () => {
 
 /* ---------- 扭蛋 ---------- */
 const FILTERS=[{k:"all",n:"隨機"},{k:"sun",n:"開心的回憶"},{k:"rain",n:"低潮時的回憶"}];
-let gFilter="all";
+let gFilter="all"; const gEmojis=new Set();
 function renderGacha(){
   const dome=$("dome");
   if(!dome.childElementCount){
@@ -797,7 +800,19 @@ function renderGacha(){
     });
   }
   const box=$("gachaChips"); box.innerHTML="";
-  FILTERS.forEach(f=>{ const b=el("button","chip",f.n); b.setAttribute("aria-pressed",String(f.k===gFilter)); b.onclick=()=>{gFilter=f.k; renderGacha();}; box.append(b); });
+  FILTERS.forEach(f=>{ const b=el("button","chip",f.n); b.setAttribute("aria-pressed",String(f.k===gFilter)); b.onclick=()=>{gFilter=f.k; gEmojis.clear(); renderGacha();}; box.append(b); });
+  const today=ymd(new Date()), cnt={};
+  notes().filter(n=>n.date!==today).forEach(n=>{ const e=moodOf(n).e; cnt[e]=(cnt[e]||0)+1; });
+  [...gEmojis].forEach(e=>{ if(!cnt[e]) gEmojis.delete(e); });
+  if(!gEmojis.size && gFilter==="emoji") gFilter="all";
+  const eb=$("gachaEmojis"); eb.innerHTML="";
+  const list=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  $("gachaEmoLabel").hidden = eb.hidden = !list.length;
+  list.forEach(([e,c])=>{
+    const b=el("button","chip emo",`${e} ${c}`); b.setAttribute("aria-pressed",String(gEmojis.has(e))); b.setAttribute("aria-label",`${e}，${c} 則`);
+    b.onclick=()=>{ if(gEmojis.has(e)) gEmojis.delete(e); else gEmojis.add(e); gFilter = gEmojis.size ? "emoji" : "all"; renderGacha(); };
+    eb.append(b);
+  });
 }
 const wait = ms => new Promise(r => setTimeout(r, ms));
 async function playGacha(color){
@@ -841,8 +856,8 @@ $("spin").onclick = async () => {
   let pool = notes().filter(n => n.date !== today);
   if(gFilter==="sun") pool=pool.filter(n=>n.mood>=4);
   if(gFilter==="rain") pool=pool.filter(n=>n.mood<=2);
-  const older = pool.filter(n => daysBetween(n.date,today) >= 7);
-  if(older.length) pool = older;
+  if(gFilter==="emoji") pool=pool.filter(n=>gEmojis.has(moodOf(n).e));
+  else{ const older = pool.filter(n => daysBetween(n.date,today) >= 7); if(older.length) pool = older; }
   const res=$("gachaResult"); res.innerHTML="";
   const n = pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
   $("spin").disabled=true;
