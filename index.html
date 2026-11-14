@@ -100,6 +100,7 @@ h2{font-size:1.15rem; font-weight:400; margin:0 0 10px}
 .note .top{display:flex; justify-content:space-between; align-items:center; font-size:.72rem; opacity:.8; margin-bottom:4px}
 .note .top b{font-size:1rem; line-height:1}
 .note img{display:block; width:100%; border-radius:6px; margin-bottom:8px; border:4px solid rgba(255,255,255,.7)}
+.pph{display:grid; place-items:center; min-height:84px; border-radius:6px; margin-bottom:8px; background:rgba(255,255,255,.45); font-size:.78rem; text-align:center; padding:8px; opacity:.85}
 .note p{margin:0; font-family:var(--hand); font-size:.88rem; line-height:1.6; white-space:pre-wrap; word-break:break-word}
 .note .meta{margin-top:6px; font-size:.68rem; opacity:.75; line-height:1.5}
 .empty{color:var(--muted); font-family:var(--hand); font-size:1.1rem; padding:20px 4px}
@@ -362,7 +363,12 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
     <div class="qbanner" id="qbanner" hidden></div>
     <div class="askbox"><div class="askq" id="askq">不知道寫什麼？讓訪談員問你一題。</div><button class="btn soft" id="ask">🤖 問我</button></div>
     <div class="paper" id="paper">
+      <img id="photoPrev" alt="這張便利貼的照片" hidden>
       <textarea id="text" placeholder="寫下這一刻……"></textarea>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label class="btn soft" style="display:inline-flex; align-items:center; cursor:pointer">📷 加照片<input type="file" id="photo" accept="image/*" hidden></label>
+      <button class="btn soft" id="rmPhoto" hidden>移除照片</button>
     </div>
     <div class="two">
       <label class="field">地點<input id="place" placeholder="巷口咖啡廳"></label>
@@ -505,7 +511,7 @@ const LS = {items:"sd-items", queue:"sd-queue", cfg:"sd-config"};
 let cfg = {url:API_DEFAULT, key:""};
 let queue = [];            // 還沒送到試算表的操作
 let syncState = "idle";    // idle | syncing | offline | auth | error
-let syncing = false, lastSync = 0;
+let syncing = false, lastSync = 0, syncErr = "";
 
 function lsGet(k, d){ try{ const r=localStorage.getItem(k); return r ? JSON.parse(r) : d; }catch(e){ return d; } }
 function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
@@ -521,7 +527,7 @@ function showStatus(){
   else if(syncState==="syncing") t = "同步中…";
   else if(syncState==="auth") t = "密碼不對，請到右上角 ⚙️ 重新輸入";
   else if(syncState==="offline") t = n ? `離線中，${n} 筆等有網路再同步` : "離線中";
-  else if(syncState==="error") t = n ? `同步失敗，${n} 筆稍後重試` : "同步失敗，稍後重試";
+  else if(syncState==="error"){ const h = /未知的動作/.test(syncErr) ? "Code.gs 還沒更新" : syncErr; t = `同步失敗${h ? "（" + h + "）" : ""}${n ? "，" + n + " 筆稍後重試" : "，稍後重試"}`; }
   else t = n ? `${n} 筆待同步` : "☁️ 已同步到 Google 試算表";
   $("sync").textContent = t;
 }
@@ -536,12 +542,26 @@ async function sync(){
   if(syncing) return;
   if(!cfg.key){ showStatus(); return; }
   if(!navigator.onLine){ syncState="offline"; showStatus(); return; }
-  syncing = true; syncState = "syncing"; showStatus();
+  syncing = true; syncState = "syncing"; syncErr = ""; showStatus();
   try{
     while(queue.length){
       const op = queue[0];
+      if(op.op==="save" && op.item.photoRef && !op.item.photoId){
+        const ref = op.item.photoRef, id = op.item.id, url = await idbGet(ref);
+        if(url){
+          const r = await api({action:"uploadPhoto", noteId:id, data:url.split(",")[1]});
+          await idbSet("id:" + r.fileId, url); await idbDel(ref);
+          const fix = x => { if(x.id===id && x.photoRef===ref){ x.photoId = r.fileId; delete x.photoRef; } };
+          queue.forEach(q => { if(q.op==="save") fix(q.item); }); items.forEach(fix);
+        }else{
+          const drop = x => { if(x.id===id && x.photoRef===ref) delete x.photoRef; };
+          queue.forEach(q => { if(q.op==="save") drop(q.item); }); items.forEach(drop);
+        }
+        lsSet(LS.items, items); lsSet(LS.queue, queue);
+      }
       await api(op.op==="delete" ? {action:"delete", id:op.id} : {action:"save", item:op.item});
-      queue.shift(); lsSet(LS.queue, queue);
+      const k = queue.indexOf(op); if(k >= 0) queue.splice(k, 1);
+      lsSet(LS.queue, queue);
     }
     const d = await api({action:"list"});
     const map = new Map();
@@ -551,6 +571,7 @@ async function sync(){
     lsSet(LS.items, items);
     syncState = "idle"; lastSync = Date.now();
   }catch(e){
+    syncErr = e.server ? e.message : "";
     syncState = e.server ? (e.message==="密碼不對" ? "auth" : "error") : (navigator.onLine ? "error" : "offline");
   }finally{
     syncing = false; showStatus(); render();
@@ -566,9 +587,43 @@ async function persist(it){
   render(); showStatus(); sync();
 }
 async function removeItem(id){
+  const gone = items.find(x => x.id === id); if(gone && photoKey(gone)) idbDel(photoKey(gone));
   items = items.filter(x => x.id !== id);
   queue = queue.filter(q => !(q.op==="save" && q.item.id===id)).concat({op:"delete", id});
   saveLocal(); render(); showStatus(); sync();
+}
+
+/* ---------- 照片（本機暫存 + Google 雲端硬碟） ---------- */
+const memPhotos = new Map();
+const idbP = new Promise(res => { try{ const r=indexedDB.open("sd-photos",1); r.onupgradeneeded=()=>r.result.createObjectStore("p"); r.onsuccess=()=>res(r.result); r.onerror=()=>res(null); r.onblocked=()=>res(null); }catch(e){ res(null); } });
+async function idbGet(k){ const db=await idbP; if(!db) return memPhotos.get(k)||null; return new Promise(r=>{ try{ const q=db.transaction("p").objectStore("p").get(k); q.onsuccess=()=>r(q.result||null); q.onerror=()=>r(null); }catch(e){ r(null); } }); }
+async function idbSet(k,v){ const db=await idbP; if(!db){ memPhotos.set(k,v); return true; } return new Promise(r=>{ try{ const t=db.transaction("p","readwrite"); t.objectStore("p").put(v,k); t.oncomplete=()=>r(true); t.onerror=()=>{ memPhotos.set(k,v); r(false); }; }catch(e){ memPhotos.set(k,v); r(false); } }); }
+async function idbDel(k){ memPhotos.delete(k); const db=await idbP; if(!db) return; return new Promise(r=>{ try{ const t=db.transaction("p","readwrite"); t.objectStore("p").delete(k); t.oncomplete=()=>r(); t.onerror=()=>r(); }catch(e){ r(); } }); }
+async function idbClear(){ memPhotos.clear(); const db=await idbP; if(!db) return; return new Promise(r=>{ try{ const t=db.transaction("p","readwrite"); t.objectStore("p").clear(); t.oncomplete=()=>r(); t.onerror=()=>r(); }catch(e){ r(); } }); }
+const photoKey = n => n.photoId ? "id:" + n.photoId : (n.photoRef || null);
+const photoJobs = new Map(), photoWait = []; let photoBusy = 0;
+const photoSlot = () => new Promise(r => { if(photoBusy < 3){ photoBusy++; r(); } else photoWait.push(r); });
+const photoFree = () => { const nx = photoWait.shift(); if(nx) nx(); else photoBusy--; };
+async function photoGet(n){
+  const key = photoKey(n); if(!key) return null;
+  const hit = await idbGet(key); if(hit) return hit;
+  if(!n.photoId || !cfg.key || !navigator.onLine) return null;
+  if(photoJobs.has(key)) return photoJobs.get(key);
+  const job = (async () => {
+    await photoSlot();
+    try{ const d = await api({action:"getPhoto", fileId:n.photoId}); const url = "data:image/jpeg;base64," + d.data; await idbSet(key, url); return url; }
+    catch(e){ return null; }
+    finally{ photoFree(); photoJobs.delete(key); }
+  })();
+  photoJobs.set(key, job); return job;
+}
+function attachPhoto(b, n){
+  if(!photoKey(n)) return;
+  const ph = el("div","pph","📷 照片載入中…"); b.append(ph);
+  photoGet(n).then(url => {
+    if(url){ const img = el("img"); img.alt = "便利貼上的照片"; img.src = url; ph.replaceWith(img); }
+    else ph.textContent = "📷 有一張照片（連上網路後顯示）";
+  });
 }
 
 /* ---------- 共用：便利貼卡 ---------- */
@@ -581,6 +636,7 @@ function noteCard(n, onClick){
   b.setAttribute("aria-label", `${n.time}，${w.n || w.e}`);
   const top = el("div","top"); top.append(el("span",null,n.time), el("b",null,w.e));
   b.append(top);
+  attachPhoto(b, n);
   if(n.card){
     const box=el("div","rc-in"), t=n.card.theme && themeOf(n.card.theme);
     if(t) box.append(el("div","tl",`🌈 ${t.n}・${t.zh} ${t.en}`));
@@ -648,7 +704,8 @@ function renderDiary(){
 }
 
 /* ---------- 便利貼表單 ---------- */
-let editing=null, cur={e:"😄", c:"#EDD69C", v:5}, questFlag=false;
+let editing=null, cur={e:"😄", c:"#EDD69C", v:5}, questFlag=false, formPhoto={changed:false, removed:false, ref:null};
+function discardPick(){ if(formPhoto.ref) idbDel(formPhoto.ref); formPhoto={changed:false, removed:false, ref:null}; }
 function renderWeatherPicker(){
   const box=$("weathers"); box.innerHTML="";
   MOODS.forEach(m => {
@@ -677,6 +734,8 @@ function openNote(n, opts={}){
   $("text").value = n ? n.text : "";
   $("tags").value = n && n.tags ? n.tags.join(" ") : (opts.quest ? "小冒險" : "");
   $("place").value = n && n.place || "";
+  discardPick(); $("photoPrev").hidden = true; $("photoPrev").removeAttribute("src"); $("rmPhoto").hidden = !(n && photoKey(n));
+  if(n && photoKey(n)) photoGet(n).then(url => { if(url && editing===n.id && !formPhoto.changed){ $("photoPrev").src = url; $("photoPrev").hidden = false; } });
   $("qbanner").hidden = !questFlag;
   if(questFlag){ const q=questFor(n ? n.date : selected); $("qbanner").textContent = `${q[0]} 小冒險：${q[1]}`; }
   $("askq").textContent = "不知道寫什麼？讓訪談員問你一題。";
@@ -687,13 +746,37 @@ function openNote(n, opts={}){
   $("noteScrim").classList.add("open");
   setTimeout(()=>$("text").focus(),60);
 }
-function closeSheets(){ document.querySelectorAll(".scrim").forEach(s=>s.classList.remove("open")); }
+function closeSheets(){ discardPick(); document.querySelectorAll(".scrim").forEach(s=>s.classList.remove("open")); }
 $("cancel").onclick=closeSheets; $("letterCancel").onclick=closeSheets;
 document.querySelectorAll(".scrim").forEach(s => s.addEventListener("click", e => { if(e.target===s) closeSheets(); }));
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeSheets(); });
 $("fab").onclick=()=>openNote(null);
 
 $("ask").onclick = () => { $("askq").textContent = ASK[Math.floor(Math.random()*ASK.length)]; };
+$("photo").onchange = e => {
+  const f = e.target.files[0]; e.target.value = ""; if(!f) return;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = async () => {
+    const sc = Math.min(1, 1000 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width*sc); c.height = Math.round(img.height*sc);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    let q = .8, d = c.toDataURL("image/jpeg", q);
+    while(d.length > 260000 && q > .35){ q -= .1; d = c.toDataURL("image/jpeg", q); }
+    URL.revokeObjectURL(url);
+    if(formPhoto.ref) idbDel(formPhoto.ref);
+    const ref = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    await idbSet(ref, d);
+    formPhoto = {changed:true, removed:false, ref};
+    $("photoPrev").src = d; $("photoPrev").hidden = false; $("rmPhoto").hidden = false; $("noteErr").textContent = "";
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); $("noteErr").textContent = "這張照片讀不出來，換一張試試。"; };
+  img.src = url;
+};
+$("rmPhoto").onclick = () => {
+  if(formPhoto.ref) idbDel(formPhoto.ref);
+  formPhoto = {changed:true, removed:true, ref:null};
+  $("photoPrev").hidden = true; $("photoPrev").removeAttribute("src"); $("rmPhoto").hidden = true;
+};
 $("emojiIn").oninput = e => {
   const v = e.target.value.trim(); if(!v) return;
   const parts = (window.Intl && Intl.Segmenter) ? [...new Intl.Segmenter().segment(v)].map(s=>s.segment) : [...v];
@@ -705,16 +788,18 @@ $("emojiIn").onblur = () => { $("emojiIn").value = cur.e; };
 $("colorIn").oninput = e => { cur.c = e.target.value; renderWeatherPicker(); };
 $("save").onclick = async () => {
   const text=$("text").value.trim();
-  const editingCard = editing && (items.find(x=>x.id===editing)||{}).card;
-  if(!text && !editingCard){ $("noteErr").textContent="寫一句話，就能貼上了。"; return; }
+  const prev = editing ? items.find(x=>x.id===editing) : null;
+  const hasPhoto = formPhoto.changed ? !formPhoto.removed : !!(prev && photoKey(prev));
+  if(!text && !(prev && prev.card) && !hasPhoto){ $("noteErr").textContent="寫一句話或放一張照片，就能貼上了。"; return; }
   const tags=$("tags").value.split(/[\s,，]+/).map(s=>s.replace(/^#/,"")).filter(Boolean);
-  const old = editing ? items.find(x=>x.id===editing) : null, now=new Date();
+  const old = prev, now=new Date();
   const note = {...(old||{
     id:"n"+now.getTime().toString(36)+Math.random().toString(36).slice(2,6), kind:"note",
     date:selected, time:`${pad(now.getHours())}:${pad(now.getMinutes())}`, created:now.getTime()
-  }), emo:null, emoji:cur.e, color:cur.c, mood:cur.v, text, tags, place:$("place").value.trim(), quest:questFlag};
+  }), emo:null, emoji:cur.e, color:cur.c, mood:cur.v, text, tags, place:$("place").value.trim(), quest:questFlag,
+    ...(formPhoto.changed ? {photoId:"", photoRef: formPhoto.removed ? null : formPhoto.ref} : {})};
   $("save").disabled=true;
-  try{ await persist(note); closeSheets(); }
+  try{ await persist(note); formPhoto={changed:false, removed:false, ref:null}; closeSheets(); }
   catch(e){ $("noteErr").textContent = e.message==="full" ? "裝置空間不夠了，試著刪掉一些舊的便利貼再貼上。" : "沒有存成功，請再按一次。"; }
   finally{ $("save").disabled=false; }
 };
@@ -1084,7 +1169,7 @@ $("importFile").onchange = async e => {
     if(!Array.isArray(arr)) throw 0;
     const ok = arr.filter(x => x && x.id && (x.kind === "letter" || x.date));
     ok.forEach(x => {
-      x.kind = x.kind || "note"; x.photo = null;
+      x.kind = x.kind || "note"; delete x.photo; delete x.photoRef;
       const i = items.findIndex(y => y.id === x.id); if(i >= 0) items[i] = x; else items.push(x);
       queue = queue.filter(q => !(q.op==="save" && q.item.id===x.id)).concat({op:"save", item:x});
     });
@@ -1094,7 +1179,7 @@ $("importFile").onchange = async e => {
 $("logoutBtn").onclick = () => {
   const n = queue.length;
   if(!confirm(n ? `還有 ${n} 筆還沒同步到 Google 試算表，登出會一起清除。確定要登出嗎？` : "登出後，這台裝置上的密碼和暫存資料會清除，Google 試算表裡的日記不受影響。確定嗎？")) return;
-  Object.values(LS).forEach(k => localStorage.removeItem(k));
+  Object.values(LS).forEach(k => localStorage.removeItem(k)); idbClear();
   items = []; queue = []; cfg = {url:API_DEFAULT, key:""}; syncState = "idle";
   render(); showStatus(); openSettings("已登出這台裝置。");
 };
