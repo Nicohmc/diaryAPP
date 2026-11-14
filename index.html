@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>日常收藏家</title>
+<meta name="theme-color" content="#F2E8E6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2B2429" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="日常收藏家">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Huninn&family=LXGW+WenKai+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2E8E6; --dot:#E6D6D3; --surface:#FFFAF8; --ink:#4D3F47; --muted:#8E7E87; --line:#E8D9D6; --accent:#C48A92; --accent-ink:#FFFFFF;
+  --w5:#DCC5E0; --w4:#EDD69C; --w3:#CCD3D6; --w2:#AFC8D3; --w1:#BDB4CC;
+  --sage:#B7C9AC; --sage-d:#8FA885; --peach:#F1CDBB; --sky:#D7E4EA; --note-ink:#3F353B;
+  --shadow:0 2px 0 rgba(77,63,71,.08),0 10px 18px -12px rgba(77,63,71,.45);
+  --round:"Huninn","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --hand:"LXGW WenKai TC","Kaiti TC","BiauKai",serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#2B2429; --dot:#352C32; --surface:#362E34; --ink:#F3E8EB; --muted:#BBA9B2; --line:#4B3F46; --accent:#D9A3AB; --accent-ink:#2B2429;
+    --w5:#C9B0CE; --w4:#D8BF84; --w3:#B7BFC3; --w2:#97B3C0; --w1:#A99FBA;
+    --sage:#8FA585; --sage-d:#728A69; --peach:#D9AE99; --sky:#3E4A52; --note-ink:#2E262B;
+    --shadow:0 10px 18px -10px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#2B2429; --dot:#352C32; --surface:#362E34; --ink:#F3E8EB; --muted:#BBA9B2; --line:#4B3F46; --accent:#D9A3AB; --accent-ink:#2B2429;
+  --w5:#C9B0CE; --w4:#D8BF84; --w3:#B7BFC3; --w2:#97B3C0; --w1:#A99FBA;
+  --sage:#8FA585; --sage-d:#728A69; --peach:#D9AE99; --sky:#3E4A52; --note-ink:#2E262B;
+  --shadow:0 10px 18px -10px rgba(0,0,0,.7);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; color:var(--ink); background-color:var(--bg);
+  background-image:radial-gradient(var(--dot) 2px,transparent 2.5px); background-size:22px 22px;
+  font-family:var(--round); font-size:16px; line-height:1.6; min-height:100%;
+}
+button{font:inherit; color:inherit}
+button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.wrap{max-width:980px; margin:0 auto; padding:18px 16px calc(110px + env(safe-area-inset-bottom,0px))}
+header{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+header h1{font-size:1.6rem; margin:0; font-weight:400; letter-spacing:.05em}
+header .logo{width:40px; height:40px; border-radius:14px; background:var(--w4); display:grid; place-items:center; font-size:1.3rem; transform:rotate(-6deg)}
+.sync{font-size:.75rem; color:var(--muted)}
+.tab{display:none}
+.tab.on{display:block}
+.card{background:var(--surface); border:2px solid var(--line); border-radius:22px; padding:16px}
+.card + .card{margin-top:14px}
+h2{font-size:1.15rem; font-weight:400; margin:0 0 10px}
+.muted{color:var(--muted)}
+.btn{border:2px solid var(--line); background:var(--surface); border-radius:999px; padding:6px 14px; cursor:pointer; min-height:38px}
+.btn:hover{border-color:var(--accent)}
+.btn.icon{width:38px; padding:0}
+.btn.main{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.btn.soft{background:var(--bg); border-color:transparent}
+.btn:disabled{opacity:.55; cursor:default}
+.row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.grow{flex:1}
+
+/* diary */
+@media (min-width:820px){ .diary{display:grid; grid-template-columns:350px 1fr; gap:28px; align-items:start} .diary .side{position:sticky; top:calc(14px + env(safe-area-inset-top,0px))} }
+.cal-head{display:flex; align-items:center; gap:6px; margin-bottom:8px}
+.cal-head .month{flex:1; font-size:1.15rem}
+.dow,.days{display:grid; grid-template-columns:repeat(7,1fr); text-align:center}
+.dow span{font-size:.78rem; color:var(--muted); padding-bottom:4px}
+.day{border:0; background:none; cursor:pointer; padding:3px 0; display:flex; flex-direction:column; align-items:center; min-height:50px; border-radius:12px}
+.day:hover{background:var(--bg)}
+.day.blank{visibility:hidden}
+.day .n{width:30px; height:30px; line-height:30px; border-radius:11px; font-size:.92rem; color:var(--ink)}
+.day.has .n{color:var(--note-ink)}
+.day.today .n{text-decoration:underline 2px var(--accent); text-underline-offset:3px}
+.day.sel .n{box-shadow:0 0 0 2.5px var(--ink)}
+.day .w{font-size:.72rem; height:14px; line-height:14px}
+.quest{display:flex; gap:12px; align-items:center; background:var(--peach); color:var(--note-ink); border-radius:18px; padding:12px 14px; margin-bottom:16px}
+.quest .qe{font-size:1.8rem}
+.quest small{display:block; opacity:.75}
+.quest .btn{background:rgba(255,255,255,.6); border-color:transparent; color:var(--note-ink); white-space:nowrap}
+.daytitle{display:flex; align-items:baseline; gap:10px; margin:4px 0 14px}
+.daytitle h2{font-family:var(--hand); font-size:1.5rem; margin:0}
+.wall{display:grid; grid-template-columns:1fr; gap:16px; max-width:560px}
+.note{
+  display:block; width:100%; text-align:left; border:0; cursor:pointer; margin:6px 0 0;
+  padding:12px 12px 10px; color:var(--note-ink); border-radius:4px 4px 14px 4px; box-shadow:var(--shadow); position:relative
+}
+.note::before{content:""; position:absolute; top:-7px; left:50%; width:44px; height:12px; margin-left:-22px; background:rgba(255,255,255,.5); border-radius:3px; transform:rotate(-3deg)}
+.note .top{display:flex; justify-content:space-between; align-items:center; font-size:.72rem; opacity:.8; margin-bottom:4px}
+.note .top b{font-size:1rem; line-height:1}
+.note img{display:block; width:100%; border-radius:6px; margin-bottom:8px; border:4px solid rgba(255,255,255,.7)}
+.note p{margin:0; font-family:var(--hand); font-size:.88rem; line-height:1.6; white-space:pre-wrap; word-break:break-word}
+.note .meta{margin-top:6px; font-size:.68rem; opacity:.75; line-height:1.5}
+.empty{color:var(--muted); font-family:var(--hand); font-size:1.1rem; padding:20px 4px}
+.wbar{display:flex; height:14px; border-radius:7px; overflow:hidden; background:var(--bg); margin-top:6px}
+.wbar span{height:100%}
+.legend{display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:8px; font-size:.82rem; color:var(--muted)}
+
+.fab{
+  position:fixed; right:18px; bottom:calc(84px + env(safe-area-inset-bottom,0px)); width:62px; height:62px; border-radius:22px;
+  border:0; background:var(--accent); color:var(--accent-ink); font-size:2rem; cursor:pointer; box-shadow:0 10px 20px -8px rgba(77,63,71,.55); z-index:6; transform:rotate(-4deg)
+}
+.fab[hidden]{display:none}
+
+/* nav */
+nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:8; background:var(--surface); border-top:2px solid var(--line);
+  padding:6px 6px env(safe-area-inset-bottom,0px); display:flex; justify-content:center
+}
+nav .in{display:grid; grid-template-columns:repeat(5,1fr); width:100%; max-width:560px}
+nav button{border:0; background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:4px 0 6px; font-size:.72rem; color:var(--muted); border-radius:14px}
+nav button b{font-size:1.35rem; line-height:1.3; font-weight:400}
+nav button[aria-current="page"]{color:var(--ink); background:var(--bg)}
+
+/* gacha */
+.machine{width:220px; margin:12px auto 0; position:relative}
+.dome{width:200px; height:200px; margin:0 auto; border-radius:50%; background:radial-gradient(circle at 50% 30%, var(--surface), var(--sky) 72%); border:6px solid var(--surface); box-shadow:0 0 0 2px var(--line); position:relative; overflow:hidden; z-index:1}
+.dome::after{content:""; position:absolute; left:30px; top:20px; width:46px; height:24px; border-radius:50%; background:rgba(255,255,255,.65); transform:rotate(-32deg); pointer-events:none; z-index:3}
+.cap{position:absolute; width:40px; height:40px; border-radius:50%; background:linear-gradient(to bottom, rgba(255,255,255,.9) 0 47%, rgba(0,0,0,.12) 47% 53%, var(--cc) 53%); box-shadow:inset 0 0 0 2px rgba(0,0,0,.06), inset -4px -5px 0 rgba(0,0,0,.07)}
+.neck{width:110px; height:14px; margin:-6px auto 0; background:var(--accent); filter:brightness(.88); border-radius:4px}
+.base{width:180px; height:92px; margin:0 auto; background:var(--accent); border-radius:12px 12px 20px 20px; position:relative; box-shadow:inset 0 -6px 0 rgba(0,0,0,.1)}
+.knob{position:absolute; left:22px; top:20px; width:50px; height:50px; border-radius:50%; border:0; padding:0; background:var(--surface); cursor:pointer; box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.knob::before{content:""; position:absolute; left:50%; top:5px; bottom:5px; width:12px; margin-left:-6px; border-radius:6px; background:var(--accent)}
+.chute{position:absolute; right:22px; top:22px; width:56px; height:54px; border-radius:12px 12px 6px 6px; background:rgba(0,0,0,.28); box-shadow:inset 0 6px 8px rgba(0,0,0,.25)}
+.out{position:absolute; right:30px; top:32px; width:40px; height:40px; z-index:2}
+.out[hidden]{display:none}
+.out .t,.out .b{position:absolute; left:0; width:40px; height:20px}
+.out .t{top:0; border-radius:20px 20px 0 0; background:rgba(255,255,255,.95)}
+.out .b{top:20px; border-radius:0 0 20px 20px; background:var(--cc)}
+.chips{display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:16px 0 10px}
+.chip{border:2px solid var(--line); background:var(--surface); border-radius:999px; padding:4px 12px; cursor:pointer; font-size:.9rem}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+.result{max-width:360px; margin:16px auto 0; animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.6); opacity:0}}
+.ago{text-align:center; font-size:.9rem; color:var(--muted); margin-bottom:4px}
+
+/* planet */
+.planet svg{display:block; width:100%; max-width:380px; margin:0 auto}
+.bob{animation:bob 4s ease-in-out infinite; transform-origin:center}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; text-align:center}
+.stats div{background:var(--bg); border-radius:14px; padding:8px 4px}
+.stats b{display:block; font-size:1.3rem; font-weight:400}
+.stats span{font-size:.75rem; color:var(--muted)}
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px}
+.qcard{border-radius:16px; padding:12px; color:var(--note-ink); background:var(--w5); min-height:120px; display:flex; flex-direction:column; gap:4px; box-shadow:var(--shadow)}
+.qcard .e{font-size:1.8rem}
+.qcard small{opacity:.7; margin-top:auto}
+
+/* letters */
+.letter{border-radius:18px; padding:14px; display:flex; gap:12px; align-items:flex-start; background:var(--bg)}
+.letter + .letter{margin-top:10px}
+.letter .e{font-size:1.8rem}
+.letter p{font-family:var(--hand); white-space:pre-wrap; margin:6px 0 0; line-height:1.75}
+
+/* report */
+.big{font-size:2.2rem; line-height:1.1}
+.grid2{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px}
+.stat{background:var(--bg); border-radius:16px; padding:12px}
+.stat .big{display:block; margin-bottom:2px}
+.forecast{font-family:var(--hand); font-size:1.08rem; line-height:1.8; white-space:pre-wrap}
+.movie{margin-top:10px; padding:10px 14px; border-radius:14px; background:var(--ink); color:var(--surface); font-family:var(--hand); font-size:1.15rem}
+.place{width:100%; text-align:left; border:0; background:var(--bg); border-radius:14px; padding:10px 14px; cursor:pointer; display:flex; gap:8px; margin-top:8px}
+.place-notes{padding:8px 4px 0}
+
+/* sheet */
+.scrim{position:fixed; inset:0; background:rgba(45,35,42,.45); display:none; align-items:flex-end; justify-content:center; z-index:20}
+.scrim.open{display:flex}
+.sheet{width:100%; max-width:540px; background:var(--surface); border-radius:26px 26px 0 0; padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px)); max-height:92vh; overflow:auto; animation:up .25s ease-out}
+@media (min-width:620px){ .scrim{align-items:center} .sheet{border-radius:26px; padding-bottom:18px} }
+@keyframes up{from{transform:translateY(30px); opacity:0}}
+.sheet h3{margin:0 0 12px; font-weight:400; font-size:1.15rem}
+.weathers{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:12px}
+@media (min-width:480px){ .weathers{grid-template-columns:repeat(6,1fr)} }
+.custom{background:var(--bg); border-radius:16px; padding:10px 12px; margin-bottom:12px}
+.emo-field{display:flex; align-items:center; gap:8px; font-size:.85rem; color:var(--muted)}
+.emo-field input{width:52px; height:42px; text-align:center; font-size:1.4rem; border:2px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); padding:0}
+.emo-field input[type=color]{padding:3px; cursor:pointer}
+.swatches{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+.sw{width:30px; height:30px; border-radius:50%; border:2px solid rgba(255,255,255,.85); cursor:pointer; box-shadow:0 0 0 1px var(--line); padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.wbtn{border:3px solid transparent; border-radius:16px; padding:6px 0 4px; cursor:pointer; color:var(--note-ink); display:flex; flex-direction:column; align-items:center; font-size:.75rem}
+.wbtn b{font-size:1.5rem; font-weight:400; line-height:1.3}
+.wbtn[aria-pressed="true"]{border-color:var(--ink); transform:translateY(-2px)}
+.askbox{display:flex; gap:8px; align-items:flex-start; margin-bottom:10px}
+.askq{flex:1; font-family:var(--hand); font-size:1rem; color:var(--muted); min-height:1.5em}
+.paper{border-radius:6px 6px 18px 6px; padding:12px; transition:background .2s}
+textarea{width:100%; min-height:130px; border:0; background:transparent; resize:vertical; font-family:var(--hand); font-size:1.1rem; line-height:1.75; color:var(--note-ink)}
+textarea::placeholder{color:rgba(0,0,0,.42)}
+.paper img{display:block; max-width:100%; max-height:220px; border-radius:6px; border:4px solid rgba(255,255,255,.7); margin-bottom:8px}
+.field{display:block; margin-top:10px; font-size:.85rem; color:var(--muted)}
+.field input,.field select{display:block; width:100%; margin-top:4px; font:inherit; font-size:1rem; color:var(--ink); background:var(--bg); border:2px solid transparent; border-radius:12px; padding:8px 12px}
+.field[hidden]{display:none}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.actions{display:flex; gap:8px; margin-top:16px; align-items:center}
+.danger{color:#B05A5A; border-color:transparent; background:transparent}
+.err{color:#B05A5A; font-size:.85rem; min-height:1.2em; margin-top:8px}
+.qbanner{background:var(--peach); color:var(--note-ink); border-radius:12px; padding:6px 12px; margin-bottom:10px; font-size:.9rem}
+.rainbow-btn{display:block; width:100%; border:0; cursor:pointer; border-radius:18px; padding:12px 14px; margin-bottom:12px; color:var(--note-ink); font-size:1rem; text-align:left;
+  background:linear-gradient(110deg,#E8BFC4,#F1C7AE,#EDD69C,#BCCDAF,#B9CFD9,#CFC6DD); box-shadow:var(--shadow)}
+.rainbow-btn small{display:block; opacity:.7; font-size:.78rem}
+.rcard-wrap{perspective:900px; display:flex; justify-content:center; margin:4px 0 8px}
+.rcard{width:230px; height:310px; position:relative; transform-style:preserve-3d; transition:transform .8s cubic-bezier(.3,.7,.2,1); cursor:pointer; border:0; padding:0; background:none}
+.rcard.flip{transform:rotateY(180deg)}
+.face{position:absolute; inset:0; border-radius:18px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:22px; text-align:center; box-shadow:var(--shadow)}
+.face.back{font-size:3.4rem; border:6px solid #FFFAF8}
+.face.front{transform:rotateY(180deg); color:#3F353B; background:#FFFAF8; border:8px solid var(--tc,#E8BFC4)}
+.tlabel{font-size:.75rem; padding:2px 10px; border-radius:999px; background:var(--tc,#E8BFC4); color:#3F353B; margin-bottom:16px}
+.tchips{margin:0 0 8px; gap:5px}
+.tchip{font-size:.8rem; padding:3px 9px; display:inline-flex; align-items:center; gap:5px}
+.tchip i{width:10px; height:10px; border-radius:50%; display:inline-block}
+.rc-in .tl{font-size:.7rem; opacity:.7; margin-bottom:2px}
+.face .zh{font-family:var(--hand); font-size:1.22rem; line-height:1.7; margin:0 0 14px}
+.face .en{font-size:.88rem; line-height:1.55; margin:0; color:#7A6C73; font-style:italic}
+.face .mark{font-size:1.4rem; margin-bottom:10px}
+.rc-in{background:rgba(255,255,255,.6); border-radius:10px; padding:10px 12px; margin-bottom:6px}
+.rc-in .zh{font-family:var(--hand); font-size:.95rem; line-height:1.6}
+.rc-in .en{font-size:.78rem; font-style:italic; opacity:.75; margin-top:4px; line-height:1.45}
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} .note{transform:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🫙</div>
+    <div class="grow"><h1>日常收藏家</h1><div class="sync" id="sync" role="status">載入中…</div></div>
+    <button class="btn icon" id="gear" aria-label="設定與備份">⚙️</button>
+  </header>
+
+  <!-- 日記 -->
+  <section class="tab on" id="tab-diary">
+    <div class="diary">
+      <div class="side">
+        <div class="card">
+          <div class="cal-head">
+            <button class="btn icon" id="prev" aria-label="上個月">‹</button>
+            <div class="month" id="monthLabel"></div>
+            <button class="btn" id="todayBtn">今天</button>
+            <button class="btn icon" id="next" aria-label="下個月">›</button>
+          </div>
+          <div class="dow"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+          <div class="days" id="days"></div>
+        </div>
+        <div class="card">
+          <h2 id="monthMood"></h2>
+          <div class="wbar" id="monthBar"></div>
+          <div class="legend" id="monthLegend"></div>
+        </div>
+      </div>
+      <div>
+        <button class="rainbow-btn" id="rainbowBtn">🌈 抽一張彩虹卡<small>七種顏色、245 張中英對照卡片</small></button>
+        <div class="quest" id="quest"></div>
+        <div class="daytitle"><h2 id="dayLabel"></h2><small class="muted" id="dayCount"></small></div>
+        <div class="wall" id="wall"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 扭蛋 -->
+  <section class="tab" id="tab-gacha">
+    <div class="card">
+      <h2>回憶扭蛋機</h2>
+      <p class="muted" style="margin:0">轉一下，和以前的自己重新遇見。</p>
+      <div class="machine" id="machine">
+        <div class="dome" id="dome"></div>
+        <div class="neck"></div>
+        <div class="base">
+          <button class="knob" id="knob" aria-label="轉動扭蛋機"></button>
+          <div class="chute"></div>
+          <div class="out" id="outCap" hidden><span class="t"></span><span class="b"></span></div>
+        </div>
+      </div>
+      <div class="chips" id="gachaChips"></div>
+      <div style="text-align:center"><button class="btn main" id="spin">轉一下</button></div>
+      <div id="gachaResult"></div>
+    </div>
+  </section>
+
+  <!-- 星球 -->
+  <section class="tab" id="tab-planet">
+    <div class="card planet">
+      <h2 id="planetTitle">我的小星球</h2>
+      <div id="planetSvg"></div>
+      <div class="stats" id="planetStats"></div>
+      <p class="muted" style="font-size:.85rem; margin:12px 0 0">每記錄一天就會長出新東西：有地點的便利貼開花，#學習 #讀書 會蓋圖書館，完成小冒險會點亮星星。休息幾天也不會枯萎。</p>
+    </div>
+    <div class="card">
+      <h2 id="cardsTitle">生活收藏卡</h2>
+      <div class="cards" id="cards"></div>
+    </div>
+  </section>
+
+  <!-- 未來信 -->
+  <section class="tab" id="tab-letters">
+    <div class="card">
+      <div class="row" style="margin-bottom:10px"><h2 class="grow" style="margin:0">寄給未來的自己</h2><button class="btn main" id="newLetter">寫一封信</button></div>
+      <div id="letters"></div>
+    </div>
+  </section>
+
+  <!-- 報告 -->
+  <section class="tab" id="tab-report">
+    <div class="card">
+      <h2>心情氣象報告</h2>
+      <div class="forecast" id="forecast"></div>
+      <div id="movie"></div>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn icon" id="yPrev" aria-label="前一年">‹</button>
+        <h2 class="grow" style="margin:0; text-align:center" id="yearTitle"></h2>
+        <button class="btn icon" id="yNext" aria-label="下一年">›</button>
+      </div>
+      <div class="grid2" id="yearStats"></div>
+      <div class="wbar" id="yearBar" style="margin-top:14px"></div>
+      <div class="legend" id="yearLegend"></div>
+    </div>
+    <div class="card">
+      <h2>人生足跡</h2>
+      <div id="places"></div>
+    </div>
+  </section>
+</div>
+
+<button class="fab" id="fab" aria-label="新增便利貼">＋</button>
+
+<nav aria-label="主選單"><div class="in" id="nav">
+  <button data-tab="diary" aria-current="page"><b>📅</b>日記</button>
+  <button data-tab="gacha"><b>🎰</b>扭蛋</button>
+  <button data-tab="planet"><b>🪐</b>小星球</button>
+  <button data-tab="letters"><b>💌</b>未來信</button>
+  <button data-tab="report"><b>📊</b>報告</button>
+</div></nav>
+
+<!-- 便利貼表單 -->
+<div class="scrim" id="noteScrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
+    <h3 id="noteTitle">現在的心情？</h3>
+    <div class="weathers" id="weathers"></div>
+    <div class="custom">
+      <div class="row">
+        <label class="emo-field">自選 emoji<input id="emojiIn" aria-label="自選 emoji" autocomplete="off"></label>
+        <span class="grow"></span>
+        <label class="emo-field">其他顏色<input type="color" id="colorIn" aria-label="自選顏色"></label>
+      </div>
+      <div class="swatches" id="swatches" aria-label="莫蘭迪色票"></div>
+    </div>
+    <div class="qbanner" id="qbanner" hidden></div>
+    <div class="askbox"><div class="askq" id="askq">不知道寫什麼？讓訪談員問你一題。</div><button class="btn soft" id="ask">🤖 問我</button></div>
+    <div class="paper" id="paper">
+      <textarea id="text" placeholder="寫下這一刻……"></textarea>
+    </div>
+    <div class="two">
+      <label class="field">地點<input id="place" placeholder="巷口咖啡廳"></label>
+      <label class="field">標籤（空格分開）<input id="tags" placeholder="小確幸 散步"></label>
+    </div>
+    <div class="err" id="noteErr"></div>
+    <div class="actions">
+      <button class="btn danger" id="del" hidden>撕掉</button>
+      <span class="grow"></span>
+      <button class="btn" id="cancel">取消</button>
+      <button class="btn main" id="save">貼上</button>
+    </div>
+  </div>
+</div>
+
+<!-- 彩虹卡 -->
+<div class="scrim" id="rainbowScrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rbTitle">
+    <h3 id="rbTitle">今天的彩虹卡</h3>
+    <div class="chips tchips" id="rcThemes"></div>
+    <p class="muted" id="rcCount" style="text-align:center; font-size:.8rem; margin:0 0 6px"></p>
+    <div class="rcard-wrap">
+      <button class="rcard" id="rcard" aria-label="翻開彩虹卡">
+        <span class="face back" id="rcBack">🌈</span>
+        <span class="face front"><span class="tlabel" id="rcTheme"></span><span class="zh" id="rcZh"></span><span class="en" id="rcEn"></span></span>
+      </button>
+    </div>
+    <p class="muted" id="rcHint" style="text-align:center; font-size:.85rem; margin:0">點卡片翻開</p>
+    <label class="field">這張卡讓你想到什麼？（可不填）<input id="rcNote" placeholder="寫一句給自己的話"></label>
+    <div class="err" id="rcErr"></div>
+    <div class="actions">
+      <button class="btn" id="rcAgain">再抽一張</button>
+      <span class="grow"></span>
+      <button class="btn" id="rcClose">關閉</button>
+      <button class="btn main" id="rcSave" disabled>存成日記</button>
+    </div>
+  </div>
+</div>
+
+<!-- 未來信表單 -->
+<div class="scrim" id="letterScrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+    <h3 id="letterTitle">親愛的未來的我</h3>
+    <div class="paper" style="background:var(--w5)"><textarea id="letterText" placeholder="想對那時候的自己說什麼？"></textarea></div>
+    <div class="row" style="margin-top:10px"><button class="btn soft" id="tplLetter">📝 給我一個開頭</button></div>
+    <label class="field">什麼時候可以打開
+      <select id="letterWhen">
+        <option value="7">一週後</option>
+        <option value="90" selected>三個月後</option>
+        <option value="365">一年後</option>
+        <option value="1825">五年後</option>
+        <option value="custom">自己選日期和時間</option>
+      </select>
+    </label>
+    <label class="field" id="customWhen" hidden>拆封的日期和時間<input type="datetime-local" id="letterDate"></label>
+    <div class="err" id="letterErr"></div>
+    <div class="actions"><span class="grow"></span><button class="btn" id="letterCancel">取消</button><button class="btn main" id="letterSave">封存這封信</button></div>
+  </div>
+</div>
+
+<!-- 設定與備份 -->
+<div class="scrim" id="setScrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <h3 id="setTitle">連接 Google 試算表</h3>
+    <label class="field">Apps Script 網址（結尾是 /exec）<input id="cfgUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    <label class="field">密碼（和 Code.gs 裡設定的一樣）<input id="cfgKey" type="password" autocomplete="current-password"></label>
+    <div class="err" id="cfgErr"></div>
+    <div class="actions"><button class="btn" id="cfgClose">關閉</button><span class="grow"></span><button class="btn main" id="cfgSave">儲存並同步</button></div>
+    <h3 style="margin-top:22px">備份</h3>
+    <div class="row">
+      <button class="btn" id="exportBtn">⬇️ 匯出備份檔</button>
+      <label class="btn" style="cursor:pointer">⬆️ 匯入備份檔<input type="file" id="importFile" accept="application/json,.json" hidden></label>
+    </div>
+    <button class="btn danger" id="logoutBtn" style="margin-top:16px">登出這台裝置</button>
+  </div>
+</div>
+
+<script>
+/* ---------- 基本資料 ---------- */
+const MOODS = [
+  {k:"happy",    e:"😄", n:"開心", v:5, c:"#EDD69C"},
+  {k:"love",     e:"🥰", n:"幸福", v:5, c:"#E8BFC4"},
+  {k:"excited",  e:"🤩", n:"興奮", v:5, c:"#F1C7AE"},
+  {k:"calm",     e:"😌", n:"平靜", v:4, c:"#BCCDAF"},
+  {k:"touched",  e:"🥹", n:"感動", v:4, c:"#E5D4B5"},
+  {k:"proud",    e:"😎", n:"得意", v:4, c:"#B9CFD9"},
+  {k:"meh",      e:"😐", n:"普通", v:3, c:"#D8D0C9"},
+  {k:"tired",    e:"😪", n:"好累", v:3, c:"#CBD0D3"},
+  {k:"confused", e:"🤔", n:"迷惘", v:3, c:"#CFC6DD"},
+  {k:"sad",      e:"😢", n:"難過", v:2, c:"#A9C1CF"},
+  {k:"anxious",  e:"😰", n:"焦慮", v:2, c:"#B9B2CB"},
+  {k:"angry",    e:"😤", n:"生氣", v:1, c:"#D4A6A1"}
+];
+const OLD_MOOD = {5:"excited",4:"happy",3:"meh",2:"sad",1:"anxious"};
+const mByK = k => MOODS.find(m => m.k === k);
+const moodOf = n => {
+  const base = mByK(n.emo) || mByK(OLD_MOOD[n.mood]) || mByK("meh");
+  const e = n.emoji || base.e, preset = MOODS.find(m => m.e === e);
+  return {k:e, e, n: preset ? preset.n : "", v: n.mood || base.v, c: n.color || base.c};
+};
+const PALETTE = [
+  ["#EDD69C","奶油芥末"],["#F1C7AE","蜜桃"],["#E8BFC4","乾燥玫瑰"],["#E3C9B8","杏仁奶茶"],
+  ["#D4A6A1","磚紅粉"],["#E5D4B5","燕麥"],["#D8C3A5","焦糖拿鐵"],["#C9B79C","駝色"],
+  ["#BCCDAF","鼠尾草"],["#C6D1B8","抹茶牛奶"],["#A9BFB0","灰綠"],["#B9CFD9","霧天藍"],
+  ["#A9C1CF","灰藍"],["#CFC6DD","淡薰衣草"],["#D9C5D6","藕荷粉"],["#D8D0C9","燕麥灰"]
+];
+const QUESTS = [
+  ["⭕","拍下一個今天遇到的圓形物品"],["🤝","記錄一個陌生人的善意"],["🛤️","走一條沒走過的路"],["🌼","找一朵路邊的小花"],
+  ["🍙","寫下今天吃到最好吃的一口"],["☁️","拍一張今天的天空"],["💬","記下一句今天聽到的有趣的話"],["🧸","找一個讓你想起童年的東西"],
+  ["🙏","對一個人說謝謝"],["🎧","記錄一首今天在聽的歌"],["👤","拍下自己的影子"],["🧋","試一杯沒喝過的飲料"],
+  ["🍀","寫下三件今天的小確幸"],["🔵","找一個藍色的東西"],["🤫","記錄今天最安靜的一分鐘"],["🧹","整理一個小角落"],
+  ["🪟","拍一張窗外的風景"],["😆","寫下今天讓你笑出來的事"],["📱","傳訊息給好久沒聯絡的人"],["🐾","觀察一隻動物五分鐘"]
+];
+const ASK = [
+  "今天有沒有哪個瞬間，讓你覺得被理解了？","如果今天是一集動畫，標題會是什麼？","今天吃到最療癒的是什麼？",
+  "今天有什麼小事，讓你覺得「還不錯嘛」？","今天的你，最想對誰說聲謝謝？","今天聞到、聽到或看到最印象深刻的是什麼？",
+  "如果把今天的心情畫成一個顏色，會是什麼顏色？為什麼？","今天有沒有做了一件讓自己驕傲的小事？","今天哪個時刻你最想按下暫停？"
+];
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const daysBetween = (a,b) => Math.round((parse(b) - parse(a)) / 86400000);
+const questFor = date => { let h=0; for(const c of date) h=(h*33+c.charCodeAt(0))%997; return QUESTS[h % QUESTS.length]; };
+const $ = id => document.getElementById(id);
+const el = (t,c,txt) => { const e=document.createElement(t); if(c) e.className=c; if(txt!=null) e.textContent=txt; return e; };
+
+let items = [];
+let view = new Date(); view.setDate(1);
+let selected = ymd(new Date());
+let reportYear = new Date().getFullYear();
+let tab = "diary";
+
+const notes = () => items.filter(i => (i.kind || "note") === "note");
+const letters = () => items.filter(i => i.kind === "letter");
+const notesOn = date => notes().filter(n => n.date === date).sort((a,b) => (a.created||0)-(b.created||0));
+
+/* ---------- 儲存（本機暫存 + Google 試算表同步） ---------- */
+const API_DEFAULT = "https://script.google.com/macros/s/AKfycbzGvZNm5NZjusudO190sSI73gGNSPCCFwWVhsE_BJxwm6X_wBzlkeNUctVgZ9jlMlERFw/exec";
+const LS = {items:"sd-items", queue:"sd-queue", cfg:"sd-config"};
+let cfg = {url:API_DEFAULT, key:""};
+let queue = [];            // 還沒送到試算表的操作
+let syncState = "idle";    // idle | syncing | offline | auth | error
+let syncing = false, lastSync = 0;
+
+function lsGet(k, d){ try{ const r=localStorage.getItem(k); return r ? JSON.parse(r) : d; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+function loadLocal(){
+  items = lsGet(LS.items, []); queue = lsGet(LS.queue, []);
+  const c = lsGet(LS.cfg, null); if(c) cfg = {url:c.url || API_DEFAULT, key:c.key || ""};
+}
+function saveLocal(){ return lsSet(LS.items, items) && lsSet(LS.queue, queue); }
+
+function showStatus(){
+  const n = queue.length; let t;
+  if(!cfg.key) t = "尚未連接 Google 試算表，目前只存在這台裝置";
+  else if(syncState==="syncing") t = "同步中…";
+  else if(syncState==="auth") t = "密碼不對，請到右上角 ⚙️ 重新輸入";
+  else if(syncState==="offline") t = n ? `離線中，${n} 筆等有網路再同步` : "離線中";
+  else if(syncState==="error") t = n ? `同步失敗，${n} 筆稍後重試` : "同步失敗，稍後重試";
+  else t = n ? `${n} 筆待同步` : "☁️ 已同步到 Google 試算表";
+  $("sync").textContent = t;
+}
+async function api(body){
+  const res = await fetch(cfg.url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({...body, key:cfg.key}), redirect:"follow"});
+  if(!res.ok) throw new Error("http " + res.status);
+  const data = await res.json();
+  if(!data.ok){ const e = new Error(data.error || "fail"); e.server = true; throw e; }
+  return data;
+}
+async function sync(){
+  if(syncing) return;
+  if(!cfg.key){ showStatus(); return; }
+  if(!navigator.onLine){ syncState="offline"; showStatus(); return; }
+  syncing = true; syncState = "syncing"; showStatus();
+  try{
+    while(queue.length){
+      const op = queue[0];
+      await api(op.op==="delete" ? {action:"delete", id:op.id} : {action:"save", item:op.item});
+      queue.shift(); lsSet(LS.queue, queue);
+    }
+    const d = await api({action:"list"});
+    const map = new Map();
+    d.notes.concat(d.letters).forEach(x => map.set(x.id, x));
+    queue.forEach(q => { if(q.op==="delete") map.delete(q.id); else map.set(q.item.id, q.item); });
+    items = Array.from(map.values());
+    lsSet(LS.items, items);
+    syncState = "idle"; lastSync = Date.now();
+  }catch(e){
+    syncState = e.server ? (e.message==="密碼不對" ? "auth" : "error") : (navigator.onLine ? "error" : "offline");
+  }finally{
+    syncing = false; showStatus(); render();
+    if(syncState==="auth") openSettings("密碼不對，請重新輸入。");
+  }
+}
+async function persist(it){
+  const prevItems = items.slice(), prevQ = queue.slice();
+  const i = items.findIndex(x => x.id === it.id);
+  if(i >= 0) items[i] = it; else items.push(it);
+  queue = queue.filter(q => !(q.op==="save" && q.item.id===it.id)).concat({op:"save", item:it});
+  if(!saveLocal()){ items = prevItems; queue = prevQ; throw new Error("full"); }
+  render(); showStatus(); sync();
+}
+async function removeItem(id){
+  items = items.filter(x => x.id !== id);
+  queue = queue.filter(q => !(q.op==="save" && q.item.id===id)).concat({op:"delete", id});
+  saveLocal(); render(); showStatus(); sync();
+}
+
+/* ---------- 共用：便利貼卡 ---------- */
+const tilt = id => { let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))|0; return ((Math.abs(h)%3)-1)*0.6; };
+function noteCard(n, onClick){
+  const w = moodOf(n);
+  const b = el("button","note");
+  b.style.background = w.c;
+  b.style.transform = `rotate(${tilt(n.id)}deg)`;
+  b.setAttribute("aria-label", `${n.time}，${w.n || w.e}`);
+  const top = el("div","top"); top.append(el("span",null,n.time), el("b",null,w.e));
+  b.append(top);
+  if(n.card){
+    const box=el("div","rc-in"), t=n.card.theme && themeOf(n.card.theme);
+    if(t) box.append(el("div","tl",`🌈 ${t.n}・${t.zh} ${t.en}`));
+    box.append(el("div","zh",n.card.zh), el("div","en",n.card.en)); b.append(box);
+  }
+  if(n.text) b.append(el("p",null,n.text));
+  const meta = [];
+  if(n.place) meta.push("📍" + n.place);
+  if(n.quest) meta.push("🎲 小冒險");
+  if(n.tags && n.tags.length) meta.push(n.tags.map(t=>"#"+t).join(" "));
+  if(meta.length) b.append(el("div","meta",meta.join("　")));
+  if(onClick) b.onclick = onClick;
+  return b;
+}
+function weatherBar(list, barEl, legendEl){
+  barEl.innerHTML=""; legendEl.innerHTML="";
+  const g={}; list.forEach(n => { const m=moodOf(n); (g[m.k]=g[m.k]||{m, c:0}).c++; });
+  Object.values(g).sort((a,b)=>b.c-a.c).forEach(({m,c}) => {
+    const s=el("span"); s.style.background=m.c; s.style.width=(c/list.length*100)+"%"; barEl.append(s);
+    legendEl.append(el("span",null,`${m.e} ${c}`));
+  });
+  if(!list.length) legendEl.append(el("span",null,"還沒有紀錄"));
+}
+function dominant(list){
+  const g = {}; list.forEach(n => { const m=moodOf(n); (g[m.k]=g[m.k]||{m, c:0}).c++; });
+  const top = Object.values(g).sort((a,b)=>b.c-a.c)[0];
+  return top ? top.m : null;
+}
+
+/* ---------- 日記 ---------- */
+function renderDiary(){
+  const y=view.getFullYear(), m=view.getMonth();
+  $("monthLabel").textContent = `${y} 年 ${m+1} 月`;
+  const days=$("days"); days.innerHTML="";
+  const start=new Date(y,m,1).getDay(), total=new Date(y,m+1,0).getDate(), today=ymd(new Date());
+  for(let i=0;i<start;i++) days.append(el("div","day blank"));
+  for(let d=1; d<=total; d++){
+    const key=`${y}-${pad(m+1)}-${pad(d)}`, list=notesOn(key), dom=dominant(list);
+    const b=el("button","day"+(list.length?" has":"")+(key===today?" today":"")+(key===selected?" sel":""));
+    b.setAttribute("aria-label", `${m+1} 月 ${d} 日，${list.length} 張便利貼`);
+    const n=el("span","n",d); if(dom) n.style.background=dom.c;
+    b.append(n, el("span","w", list.length ? dom.e + (list.length>1 ? list.length : "") : ""));
+    b.onclick=()=>{ selected=key; render(); if(innerWidth<820) $("dayLabel").scrollIntoView({behavior:"smooth"}); };
+    days.append(b);
+  }
+  const month = notes().filter(n => n.date.startsWith(`${y}-${pad(m+1)}-`));
+  $("monthMood").textContent = `${m+1} 月的心情（${month.length} 張）`;
+  weatherBar(month, $("monthBar"), $("monthLegend"));
+
+  const q = questFor(selected), done = notesOn(selected).some(n => n.quest);
+  const qb = $("quest"); qb.innerHTML="";
+  const txt = el("div","grow"); txt.append(el("small",null, selected===today ? "今日小冒險" : "這天的小冒險"), el("span",null,q[1]));
+  const btn = el("button","btn", done ? "已收藏 ✓" : "完成了！");
+  btn.disabled = done;
+  btn.onclick = () => openNote(null, {quest:true});
+  qb.append(el("span","qe",q[0]), txt, btn);
+
+  const dt=parse(selected);
+  $("dayLabel").textContent = `${dt.getMonth()+1} 月 ${dt.getDate()} 日・星期${"日一二三四五六"[dt.getDay()]}`;
+  const list = notesOn(selected);
+  $("dayCount").textContent = list.length ? `${list.length} 張` : "";
+  const wall=$("wall"); wall.innerHTML="";
+  if(!list.length){ wall.append(el("div","empty","這天還空空的。點右下角的「＋」，收藏一個生活碎片。")); return; }
+  list.forEach(n => wall.append(noteCard(n, () => openNote(n))));
+}
+
+/* ---------- 便利貼表單 ---------- */
+let editing=null, cur={e:"😄", c:"#EDD69C", v:5}, questFlag=false;
+function renderWeatherPicker(){
+  const box=$("weathers"); box.innerHTML="";
+  MOODS.forEach(m => {
+    const b=el("button","wbtn"); b.type="button"; b.style.background=m.c;
+    b.setAttribute("aria-pressed", String(m.e===cur.e && m.c===cur.c));
+    b.append(el("b",null,m.e), el("span",null,m.n));
+    b.onclick=()=>{ cur={e:m.e, c:m.c, v:m.v}; renderWeatherPicker(); };
+    box.append(b);
+  });
+  if(document.activeElement !== $("emojiIn")) $("emojiIn").value = cur.e;
+  const sw=$("swatches"); sw.innerHTML="";
+  PALETTE.forEach(([hex,name]) => {
+    const s=el("button","sw"); s.type="button"; s.style.background=hex; s.title=name;
+    s.setAttribute("aria-label", name);
+    s.setAttribute("aria-pressed", String(hex.toLowerCase()===cur.c.toLowerCase()));
+    s.onclick=()=>{ cur.c=hex; renderWeatherPicker(); };
+    sw.append(s);
+  });
+  $("colorIn").value = cur.c.startsWith("#") ? cur.c : "#E8BFC4";
+  $("paper").style.background = cur.c;
+}
+function openNote(n, opts={}){
+  editing = n ? n.id : null;
+  if(n){ const m=moodOf(n); cur={e:m.e, c:m.c, v:m.v}; } else cur={e:"😄", c:"#EDD69C", v:5};
+  questFlag = n ? !!n.quest : !!opts.quest;
+  $("text").value = n ? n.text : "";
+  $("tags").value = n && n.tags ? n.tags.join(" ") : (opts.quest ? "小冒險" : "");
+  $("place").value = n && n.place || "";
+  $("qbanner").hidden = !questFlag;
+  if(questFlag){ const q=questFor(n ? n.date : selected); $("qbanner").textContent = `${q[0]} 小冒險：${q[1]}`; }
+  $("askq").textContent = "不知道寫什麼？讓訪談員問你一題。";
+  $("del").hidden=!n; $("save").textContent = n ? "儲存" : "貼上";
+  $("noteTitle").textContent = n ? `編輯 ${n.time} 的便利貼` : "現在的心情？";
+  $("noteErr").textContent="";
+  renderWeatherPicker();
+  $("noteScrim").classList.add("open");
+  setTimeout(()=>$("text").focus(),60);
+}
+function closeSheets(){ document.querySelectorAll(".scrim").forEach(s=>s.classList.remove("open")); }
+$("cancel").onclick=closeSheets; $("letterCancel").onclick=closeSheets;
+document.querySelectorAll(".scrim").forEach(s => s.addEventListener("click", e => { if(e.target===s) closeSheets(); }));
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeSheets(); });
+$("fab").onclick=()=>openNote(null);
+
+$("ask").onclick = () => { $("askq").textContent = ASK[Math.floor(Math.random()*ASK.length)]; };
+$("emojiIn").oninput = e => {
+  const v = e.target.value.trim(); if(!v) return;
+  const parts = (window.Intl && Intl.Segmenter) ? [...new Intl.Segmenter().segment(v)].map(s=>s.segment) : [...v];
+  cur.e = parts[parts.length-1];
+  const preset = MOODS.find(m => m.e === cur.e); if(preset) cur.v = preset.v;
+  renderWeatherPicker();
+};
+$("emojiIn").onblur = () => { $("emojiIn").value = cur.e; };
+$("colorIn").oninput = e => { cur.c = e.target.value; renderWeatherPicker(); };
+$("save").onclick = async () => {
+  const text=$("text").value.trim();
+  const editingCard = editing && (items.find(x=>x.id===editing)||{}).card;
+  if(!text && !editingCard){ $("noteErr").textContent="寫一句話，就能貼上了。"; return; }
+  const tags=$("tags").value.split(/[\s,，]+/).map(s=>s.replace(/^#/,"")).filter(Boolean);
+  const old = editing ? items.find(x=>x.id===editing) : null, now=new Date();
+  const note = {...(old||{
+    id:"n"+now.getTime().toString(36)+Math.random().toString(36).slice(2,6), kind:"note",
+    date:selected, time:`${pad(now.getHours())}:${pad(now.getMinutes())}`, created:now.getTime()
+  }), emo:null, emoji:cur.e, color:cur.c, mood:cur.v, text, tags, place:$("place").value.trim(), quest:questFlag};
+  $("save").disabled=true;
+  try{ await persist(note); closeSheets(); }
+  catch(e){ $("noteErr").textContent = e.message==="full" ? "裝置空間不夠了，試著刪掉一些舊的便利貼再貼上。" : "沒有存成功，請再按一次。"; }
+  finally{ $("save").disabled=false; }
+};
+$("del").onclick = async () => {
+  if(!editing || !confirm("確定要撕掉這張便利貼嗎？")) return;
+  try{ await removeItem(editing); closeSheets(); }catch(e){ $("noteErr").textContent="沒有撕掉，請再試一次。"; }
+};
+$("prev").onclick=()=>{ view.setMonth(view.getMonth()-1); render(); };
+$("next").onclick=()=>{ view.setMonth(view.getMonth()+1); render(); };
+$("todayBtn").onclick=()=>{ const t=new Date(); view=new Date(t.getFullYear(),t.getMonth(),1); selected=ymd(t); render(); };
+
+/* ---------- 彩虹卡 ---------- */
+const THEMES = [
+  {k:"red",    n:"紅", zh:"安定", en:"Grounding",   c:"#D9A5A0"},
+  {k:"orange", n:"橙", zh:"喜悅", en:"Joy",         c:"#EFBE9F"},
+  {k:"yellow", n:"黃", zh:"自信", en:"Confidence",  c:"#E8D08F"},
+  {k:"green",  n:"綠", zh:"愛",   en:"Love",        c:"#B5C9A5"},
+  {k:"blue",   n:"藍", zh:"表達", en:"Expression",  c:"#AFCBD8"},
+  {k:"indigo", n:"靛", zh:"洞察", en:"Insight",     c:"#A9B1CC"},
+  {k:"violet", n:"紫", zh:"意義", en:"Meaning",     c:"#C9B9D8"}
+];
+const RAINBOW = {"red": [["今天的你，值得被好好照顧。", "You deserve to be cared for today."], ["不必急著證明自己，你已經在這裡。", "You do not have to prove yourself; you are already here."], ["安全感可以從一個深呼吸開始。", "A sense of safety can begin with one deep breath."], ["你的界線，是對自己溫柔的保護。", "Your boundaries are a gentle way to protect yourself."], ["累了就停下來，休息也是前進的一部分。", "When you are tired, pause; rest is part of moving forward."], ["你可以慢慢走，不需要跟上所有人。", "You may walk slowly; you do not need to keep up with everyone."], ["把注意力帶回腳下，這一步就很重要。", "Bring your attention to the ground beneath you; this step matters."], ["你的需要不必排在最後。", "Your needs do not have to come last."], ["勇敢有時只是說出「我需要幫忙」。", "Sometimes courage is simply saying, “I need help.”"], ["今天先照顧好身體，再處理世界。", "Care for your body first today, then attend to the world."], ["你有權選擇讓自己安心的距離。", "You have the right to choose a distance that feels safe."], ["即使感到害怕，你仍能做一個小決定。", "Even when you feel afraid, you can make one small decision."], ["活著的每一天，都不必完美才有價值。", "No day of your life has to be perfect to have value."], ["請相信，你可以為自己創造安穩。", "Trust that you can create steadiness for yourself."], ["先讓肩膀放鬆，事情可以一件一件來。", "Relax your shoulders first; things can be handled one at a time."], ["說「不」不會讓你的善良變少。", "Saying no does not make you any less kind."], ["你不需要用忙碌交換存在的意義。", "You do not need to trade constant busyness for a sense of worth."], ["給自己一點空間，讓心重新站穩。", "Give yourself space to find your footing again."], ["真正的堅強，也容得下脆弱。", "True strength has room for vulnerability."], ["每一次重新開始，都值得尊重。", "Every fresh start deserves respect."], ["當世界太吵，先聽見自己的呼吸。", "When the world grows loud, listen to your breathing first."], ["你可以保護自己的時間與精力。", "You can protect your time and energy."], ["沒有完成所有事，也不代表今天失敗。", "An unfinished to-do list does not mean today was a failure."], ["把雙腳踩穩，答案不必立刻出現。", "Stand firmly; the answer does not have to appear at once."], ["穩定不是不搖晃，而是知道如何回來。", "Stability is not never swaying; it is knowing how to return."], ["你可以選擇不再勉強自己。", "You may choose to stop forcing yourself."], ["讓食物、睡眠和陽光成為今天的小支持。", "Let food, sleep, and sunlight offer small support today."], ["你的存在，不需要任何附加條件。", "Your existence comes with no conditions to meet."], ["照顧自己的感受，是一種責任也是自由。", "Caring for your feelings is both a responsibility and a freedom."], ["今天就從最容易做到的一件事開始。", "Begin today with the one thing that feels most doable."], ["請把自己放回生活的中心一點點。", "Place yourself a little closer to the center of your life."], ["不確定的日子，也能有一個安定的角落。", "Even uncertain days can hold a steady corner."], ["你可以在改變之前，先好好站穩。", "You can find solid ground before making a change."], ["真正屬於你的步調，不必向誰解釋。", "You owe no one an explanation for your own pace."], ["此刻的你，值得一份踏實的安心。", "You deserve a grounded sense of safety in this moment."]], "orange": [["快樂不必盛大，一口喜歡的食物就很好。", "Joy need not be grand; one favorite bite is enough."], ["允許自己對小事感到興奮。", "Allow yourself to be excited about small things."], ["今天可以試一件沒有目的的新鮮事。", "Try something new today without needing a reason."], ["你的好奇心，會帶你遇見新風景。", "Your curiosity can lead you to new scenery."], ["玩耍不是浪費時間，是讓心呼吸。", "Play is not wasted time; it gives your heart room to breathe."], ["把一點色彩加進平凡的下午。", "Add a touch of color to an ordinary afternoon."], ["你可以喜歡很多事，不必立刻選出最愛。", "You can love many things without choosing a favorite right away."], ["今天想笑，就讓笑容自然發生。", "If you feel like smiling today, let it happen naturally."], ["創意常從「如果這樣呢」開始。", "Creativity often begins with “What if?”"], ["生活值得一些突如其來的小驚喜。", "Life deserves a few unexpected little surprises."], ["嘗試新方法，不等於否定舊的自己。", "Trying a new way does not reject who you used to be."], ["讓雙手去做一件讓你開心的事。", "Let your hands make something that brings you joy."], ["你不必很擅長，才有資格享受。", "You do not have to be good at something to enjoy it."], ["好玩的念頭，也值得被認真對待。", "Playful ideas deserve to be taken seriously too."], ["今天的靈感，可能藏在一段散步裡。", "Today’s inspiration may be hiding in a walk."], ["可以偶爾任性地選擇自己喜歡的。", "Sometimes you may simply choose what you like."], ["給無聊一點時間，它可能長出想像。", "Give boredom some time; it may grow into imagination."], ["你的笑聲，是生活裡真實的光。", "Your laughter is a real light in your life."], ["今天不妨替平常的路換個方向。", "Consider taking a different route today."], ["把喜歡的事情，留一小格時間給它。", "Save a small pocket of time for what you love."], ["感受當下的美好，不必急著拍下來。", "Enjoy a beautiful moment without rushing to capture it."], ["一個小小的嘗試，也能打開新的門。", "A tiny experiment can open a new door."], ["讓自己重新像孩子一樣發問。", "Let yourself ask questions like a child again."], ["今天的生活，可以有一點不照計畫。", "Today can hold a little room for the unplanned."], ["你可以創造自己的慶祝方式。", "You can invent your own way to celebrate."], ["允許靈感不完整，先把它留下。", "Let an idea be unfinished; save it anyway."], ["幸福有時是一杯剛好溫熱的茶。", "Sometimes happiness is a cup of tea at just the right warmth."], ["你值得擁有純粹好玩的時刻。", "You deserve moments that are simply fun."], ["今天做一件只為滿足好奇的事。", "Do one thing today purely out of curiosity."], ["把日常當作可以重新發現的地方。", "Treat the everyday as a place to rediscover."], ["快樂不用被比較，屬於你就足夠。", "Joy needs no comparison; it is enough that it is yours."], ["小小的即興，也是一種創造。", "A little improvisation is a form of creation."], ["試著為今天取一個有趣的名字。", "Try giving today a playful name."], ["你的喜好，是認識自己的線索。", "Your preferences are clues to who you are."], ["願你在普通的一天裡，找到一點雀躍。", "May you find a spark of delight in an ordinary day."]], "yellow": [["你的聲音，值得在重要時刻被聽見。", "Your voice deserves to be heard when it matters."], ["不用準備到完美，才可以開始。", "You do not need to be perfectly ready to begin."], ["每一次選擇，都是更認識自己的機會。", "Every choice is a chance to know yourself better."], ["你可以一邊懷疑，一邊往前試試看。", "You can have doubts and still try moving forward."], ["別人的速度，不是衡量你的尺。", "Someone else’s pace is not a measure of yours."], ["把今天做成的小事，算進自己的努力。", "Count the small things you achieved today."], ["你有權改變曾經堅持的答案。", "You have the right to change an answer you once held firmly."], ["先做一個決定，再慢慢修正方向。", "Make one decision first, then adjust your direction."], ["不必得到所有人的同意，才能相信自己。", "You do not need everyone’s approval to trust yourself."], ["請記得，你的想法也有重量。", "Remember that your ideas carry weight too."], ["遇到困難，不代表你不適合這條路。", "Difficulty does not mean this path is not for you."], ["今天的你，可以為自己說一句肯定。", "You can offer yourself one affirmation today."], ["把「我不會」暫時改成「我還在學」。", "Try replacing “I can’t” with “I’m still learning.”"], ["你能承認錯誤，也能保有自信。", "You can admit a mistake and still be confident."], ["一小步的實踐，比完美計畫更有力量。", "One small action can matter more than a perfect plan."], ["你的價值，不由一次表現決定。", "One performance does not define your worth."], ["選擇自己想要的方向，是一種練習。", "Choosing your own direction is a practice."], ["請為自己的進步留下一點掌聲。", "Save a little applause for your progress."], ["害怕做錯時，先問自己真正想試什麼。", "When you fear mistakes, ask what you truly want to try."], ["你可以不擅長拒絕，但仍然練習拒絕。", "You can practice saying no even if it feels hard."], ["每個新開始，都需要一點不熟練。", "Every beginning comes with a little awkwardness."], ["你的成功，可以由你自己定義。", "You get to define what success means to you."], ["今天可以選擇相信自己的判斷一次。", "Choose to trust your judgment once today."], ["不需要把所有優點都展示給別人看。", "You do not have to display every strength you have."], ["完成一半，也值得回頭看見努力。", "Halfway done is still worth recognizing."], ["你比昨天多懂一點，就已經在成長。", "Knowing a little more than yesterday is growth."], ["讓行動替你的願望說第一句話。", "Let action speak the first word for your wish."], ["自信不必很大聲，也能很堅定。", "Confidence can be quiet and still be firm."], ["你可以在不確定中，保留自己的立場。", "You can hold your ground amid uncertainty."], ["不要忽略那個曾經勇敢嘗試的自己。", "Do not overlook the version of you who dared to try."], ["把一件難事拆小，並不是退縮。", "Breaking a hard task down is not backing away."], ["你可以欣賞別人，也不低估自己。", "You can admire others without diminishing yourself."], ["給自己犯錯與重新選擇的自由。", "Give yourself freedom to err and choose again."], ["你已經有資格為自己的生活作主。", "You are allowed to make choices for your own life."], ["今天的勇氣，可能只是按下開始。", "Today’s courage may be as simple as pressing start."]], "green": [["愛可以先從聽見自己的感受開始。", "Love can begin with listening to your own feelings."], ["你不需要總是付出，才值得被愛。", "You do not have to keep giving to deserve love."], ["真誠的陪伴，不一定需要很多話。", "Genuine company does not always need many words."], ["把溫柔留一份給今天的自己。", "Save some tenderness for yourself today."], ["關係裡的舒服，也是一件重要的事。", "Feeling at ease matters in relationships too."], ["你可以愛一個人，也保有自己的界線。", "You can love someone and keep your boundaries."], ["一句用心的問候，可能照亮一整天。", "A thoughtful greeting can brighten an entire day."], ["允許彼此不同，是靠近的一種方式。", "Allowing differences can be a way of growing closer."], ["不必急著原諒，先照顧受傷的自己。", "You need not rush to forgive; care for your hurt first."], ["被理解很珍貴，理解自己也一樣。", "Being understood is precious; understanding yourself is too."], ["今天可以對重要的人表達一點感謝。", "Share a little gratitude with someone important today."], ["你值得一段讓你安心做自己的關係。", "You deserve relationships where you feel safe being yourself."], ["愛不是猜測，願意溝通也是溫柔。", "Love is not mind-reading; communicating is an act of care."], ["別忘了問問自己，這段關係讓你感覺如何。", "Remember to ask how this relationship makes you feel."], ["你的善意，不必用委屈自己來證明。", "Kindness need not be proven through self-sacrifice."], ["人與人之間，可以留白也可以親近。", "There can be both space and closeness between people."], ["謝謝那個願意陪你走一小段路的人。", "Appreciate the person who walks beside you for a while."], ["說出想念，不一定需要特別的理由。", "You do not need a special reason to say you miss someone."], ["一份安靜的關心，也能被感受到。", "Quiet care can be felt too."], ["請容許自己接受別人的好意。", "Allow yourself to receive someone else’s kindness."], ["你可以喜歡獨處，也珍惜連結。", "You can enjoy solitude and cherish connection."], ["愛裡可以有誠實，不必只有討好。", "Love can include honesty, not just pleasing others."], ["當你說出感受，也是在邀請理解。", "Sharing your feelings is an invitation to understanding."], ["有些陪伴的價值，藏在一起沉默的時候。", "Some of the value of company lives in shared silence."], ["不要因為一次爭執，就否定所有溫暖。", "Do not let one disagreement erase every warm moment."], ["你可以選擇靠近，也可以選擇離開。", "You are free to move closer or walk away."], ["願意聽完一個故事，也是一份禮物。", "Listening to a whole story is a gift."], ["今天先用不苛刻的眼光看待自己。", "Look at yourself with less judgment today."], ["真正的親密，容得下彼此的真實。", "Real closeness makes room for authenticity."], ["你不需要修好每個人的心情。", "You are not responsible for fixing everyone’s mood."], ["關心可以很簡單，像一句「你還好嗎」。", "Care can be as simple as asking, “Are you okay?”"], ["珍惜相遇，也尊重每段關係的季節。", "Treasure meetings and respect the seasons of relationships."], ["請把對朋友的寬容，也分一點給自己。", "Offer yourself some of the grace you give friends."], ["愛不需要完美，卻需要真實。", "Love does not need perfection, but it needs honesty."], ["願你在被愛的同時，也自在地愛自己。", "May you love yourself freely while being loved."]], "blue": [["你的感受，可以用自己的方式說出來。", "You can express your feelings in your own way."], ["沉默是選擇，表達也同樣是選擇。", "Silence is a choice, and speaking is one too."], ["不必把每句話都說得漂亮，真實就好。", "Your words need not be polished; being genuine is enough."], ["你可以先整理思緒，再慢慢回答。", "You can gather your thoughts before answering."], ["一句清楚的需求，勝過反覆委屈自己。", "A clear request can spare you repeated resentment."], ["今天試著說出一件你真正想要的事。", "Try naming one thing you truly want today."], ["不同意，不等於不尊重。", "Disagreement is not the same as disrespect."], ["你的故事，值得由你自己來敘述。", "Your story deserves to be told in your own voice."], ["開口之前，可以先聽聽自己的心。", "Before speaking, take a moment to listen inward."], ["好好說話，也包括對自己說話。", "Speaking kindly includes how you speak to yourself."], ["不是每個誤解，都需要立即解開。", "Not every misunderstanding must be resolved at once."], ["你可以把「沒關係」換成真正的感受。", "You can replace “It’s fine” with what you really feel."], ["有時一句「我不知道」就是誠實。", "Sometimes “I don’t know” is the most honest answer."], ["願你的表達，不再只是害怕失去。", "May your words come from more than fear of losing someone."], ["先確認彼此的意思，再急著下結論。", "Check what each other means before drawing conclusions."], ["你的意見，即使不同也值得存在。", "Your opinion deserves space even when it differs."], ["有些話說得慢一點，反而更有力量。", "Some words carry more power when spoken slowly."], ["溫柔與堅定，可以一起出現在一句話裡。", "Gentleness and firmness can share one sentence."], ["試著把責備改成描述自己的感受。", "Try describing your feelings instead of assigning blame."], ["允許自己在對話中保留思考的空間。", "Allow yourself room to think during a conversation."], ["真正的傾聽，是讓對方有完整說話的時間。", "Real listening gives others time to finish their thoughts."], ["你可以誠實說出自己還沒準備好。", "You can honestly say you are not ready yet."], ["不需要為每次沉默找一個藉口。", "You do not need an excuse for every silence."], ["一個好問題，可能比急著回答更重要。", "A good question may matter more than a quick answer."], ["把心裡模糊的事寫下來，它會慢慢清楚。", "Write down what feels vague; clarity may come gradually."], ["你可以請別人再說一次，理解需要時間。", "You can ask someone to repeat themselves; understanding takes time."], ["說出謝謝，也說出你為何感謝。", "Say thank you, and share what you are grateful for."], ["你的拒絕，可以簡短而完整。", "Your no can be brief and complete."], ["當你願意提問，連結就有了入口。", "When you ask, you open a door to connection."], ["一段真實的對話，不必每句都正確。", "An honest conversation does not require perfect words."], ["今天替心裡的感覺找到一個名字。", "Give a name to one feeling inside you today."], ["讓語氣柔軟，讓立場清楚。", "Let your tone be gentle and your position clear."], ["你可以分享故事，也可以保留隱私。", "You may share your story and still keep your privacy."], ["最重要的話，可以練習很多次再說。", "You can rehearse important words as many times as you need."], ["願你說出的話，越來越靠近真正的自己。", "May your words grow closer to your true self."]], "indigo": [["當你安靜下來，會聽見更多細節。", "When you grow quiet, more details become audible."], ["直覺是線索，不一定是最後的答案。", "Intuition is a clue, not always the final answer."], ["今天留意一件你以前沒注意過的小事。", "Notice one small thing you have overlooked before."], ["你可以觀察情緒，而不急著評價它。", "You can observe a feeling without judging it."], ["有些理解，需要經過一段安靜的時間。", "Some understanding needs a season of quiet."], ["讓問題留在心裡一會兒，不必急著填滿。", "Let a question stay with you without rushing to fill the silence."], ["你的感覺值得參考，也值得被查證。", "Your feelings are worth considering and worth checking."], ["今天試著看見一件事的另一個角度。", "Try seeing one situation from another angle today."], ["那些反覆出現的念頭，可能在提醒你什麼。", "Recurring thoughts may be pointing toward something."], ["未知不一定危險，也可能是新的空間。", "The unknown is not always dangerous; it can be new space."], ["把注意力放在此刻，而不是所有可能。", "Attend to this moment, not every possible outcome."], ["你有能力分辨想像與眼前的事實。", "You can distinguish imagination from what is in front of you."], ["每個疑問，都可以成為探索的起點。", "Every question can become a starting point for discovery."], ["今天的答案，也許不需要那麼快。", "Today’s answer may not need to arrive so quickly."], ["安靜觀察，不代表什麼都沒發生。", "Quiet observation does not mean nothing is happening."], ["試著問：我真正擔心的是什麼？", "Try asking: What am I really worried about?"], ["同一段經歷，可能同時有好幾種感受。", "One experience can hold several feelings at once."], ["當你看清自己的模式，就有重新選擇的可能。", "Seeing your patterns creates room to choose again."], ["不確定的感覺，也值得被如實記錄。", "Uncertainty deserves to be recorded as it is."], ["你可以不相信每個從腦海閃過的念頭。", "You do not have to believe every passing thought."], ["留意讓你感到平靜的事物，它們是線索。", "Notice what brings you calm; those are clues."], ["有時換一個問題，就能看見新答案。", "Sometimes a new question reveals a new answer."], ["今天讓自己有五分鐘不被打斷的時間。", "Give yourself five uninterrupted minutes today."], ["答案不明朗時，先記下你已經知道的。", "When answers are unclear, write down what you know."], ["你可以同時保有想像力與判斷力。", "You can hold imagination and discernment together."], ["把困惑寫成問題，往往比壓下它更有用。", "Turning confusion into a question can help more than suppressing it."], ["情緒背後，可能藏著一個尚未被照顧的需要。", "Behind a feeling may be a need still waiting for care."], ["慢慢理解自己，也是一種探索。", "Understanding yourself slowly is a kind of exploration."], ["今天試著區分「我知道」和「我猜想」。", "Try separating “I know” from “I assume” today."], ["允許事情保有複雜，而不急著分對錯。", "Let things be complex without rushing to label them right or wrong."], ["那些看似普通的瞬間，也可能藏著答案。", "An ordinary moment may hold an answer."], ["你可以懷抱疑問，也繼續過好今天。", "You can carry questions and still live today fully."], ["注意自己何時最像自己，那很重要。", "Notice when you feel most like yourself; it matters."], ["試著聽見沉默裡真正想說的話。", "Try hearing what the silence is really saying."], ["看得更清楚，不代表必須立刻行動。", "Seeing clearly does not mean you must act immediately."]], "violet": [["你不必知道終點，才能走好眼前一步。", "You do not need to know the destination to take the next step."], ["成長也許很安靜，但它確實在發生。", "Growth may be quiet, but it is still happening."], ["人生的意義，可以隨著你一起改變。", "The meaning of life can change as you do."], ["今天的平凡，也可能是未來珍惜的時光。", "Today’s ordinary moments may become tomorrow’s treasures."], ["給未知留一個位置，讓驚喜有地方進來。", "Leave room for the unknown so surprise can enter."], ["你可以重新定義什麼叫做足夠。", "You can redefine what enough means."], ["每個階段的自己，都有值得感謝的地方。", "Every version of you has something worth thanking."], ["放下不再適合的期待，也是一種成熟。", "Releasing expectations that no longer fit is a kind of maturity."], ["你的人生，不需要和誰的故事一模一樣。", "Your life does not have to resemble anyone else’s story."], ["即使答案改變，曾經的真心也是真的。", "Even if your answer changes, your past sincerity was real."], ["今天你可以先活在故事裡，不急著寫結局。", "Live inside your story today without rushing its ending."], ["有些告別，是為了讓新的自己有空間。", "Some goodbyes make space for a new version of you."], ["當你願意回望，也會更懂得向前。", "Looking back can help you move forward with understanding."], ["生命不是考試，不需要每題都答對。", "Life is not an exam; you need not answer every question correctly."], ["你可以珍惜過去，同時迎接改變。", "You can honor the past and welcome change."], ["今天做的善意小事，也可能留在別人的故事裡。", "A small kindness today may remain in someone else’s story."], ["不要因為路遠，就忽略沿途的光。", "Do not overlook the light along the way because the road is long."], ["你的價值，超過你能列出的成就。", "Your worth reaches beyond your list of achievements."], ["時間會改變很多事，也讓一些珍貴更清楚。", "Time changes many things and clarifies what matters."], ["你可以對未來保持希望，也允許今天疲倦。", "You can hope for the future and still feel tired today."], ["每一段經歷，都有權以自己的方式被理解。", "Every experience can be understood in its own way."], ["不需要把人生過成一個完美的答案。", "You do not have to turn your life into a perfect answer."], ["你可以保留一點神祕，讓自己持續發現。", "Keep a little mystery so you can continue discovering yourself."], ["今天的選擇，正在形成你獨特的故事。", "Today’s choices are shaping your unique story."], ["願你有勇氣離開不再屬於你的角色。", "May you have courage to leave roles that no longer fit."], ["當你看見自己的改變，也請溫柔看待從前。", "As you notice your growth, be gentle with who you were."], ["一段旅程的價值，不只在抵達。", "A journey has value beyond its destination."], ["你可以為生活賦予意義，而非等待意義出現。", "You can give life meaning instead of waiting for it to appear."], ["未來的你，可能會感謝今天這份耐心。", "Your future self may thank you for today’s patience."], ["生命的寬廣，容得下不同版本的幸福。", "Life is wide enough for many versions of happiness."], ["請珍惜那個還願意相信可能性的自己。", "Cherish the part of you that still believes in possibility."], ["即使走了彎路，也不代表白走。", "A winding path is not necessarily a wasted one."], ["你正在成為的人，值得慢慢認識。", "The person you are becoming is worth getting to know."], ["每一天都不是重複，而是新的一頁。", "No day is merely a repeat; each is a new page."], ["願你在自己的時間裡，活出喜歡的樣子。", "May you become who you love being, in your own time."]]};
+const ALL_CARDS = THEMES.flatMap(t => RAINBOW[t.k].map(c => ({zh:c[0], en:c[1], theme:t.k})));
+const themeOf = k => THEMES.find(t => t.k === k);
+const RAINBOW_COLOR = "linear-gradient(135deg,#F3D3D6,#F4E2B5,#D3E0C8,#D0E0E8,#DDD5E8)";
+const STRIPES = "repeating-linear-gradient(135deg," + THEMES.map((t,i)=>`${t.c} ${i*14}px ${(i+1)*14}px`).join(",") + ")";
+let rc = null, rcPick = "all";
+function renderThemeChips(){
+  const box=$("rcThemes"); box.innerHTML="";
+  const all=el("button","chip tchip","🌈 隨機"); all.setAttribute("aria-pressed", String(rcPick==="all"));
+  all.onclick=()=>{ rcPick="all"; renderThemeChips(); drawRainbow(); }; box.append(all);
+  THEMES.forEach(t=>{
+    const b=el("button","chip tchip"); b.setAttribute("aria-pressed", String(rcPick===t.k));
+    const dot=el("i"); dot.style.background=t.c; b.append(dot, document.createTextNode(`${t.n}・${t.zh}`));
+    b.onclick=()=>{ rcPick=t.k; renderThemeChips(); drawRainbow(); }; box.append(b);
+  });
+  const t = rcPick==="all" ? null : themeOf(rcPick);
+  $("rcCount").textContent = t ? `${t.n}色卡・${t.zh} ${t.en}，共 ${RAINBOW[t.k].length} 張` : `七種顏色，共 ${ALL_CARDS.length} 張`;
+}
+function drawRainbow(){
+  const pool = rcPick==="all" ? ALL_CARDS : ALL_CARDS.filter(c => c.theme === rcPick);
+  let pick; do{ pick = pool[Math.floor(Math.random()*pool.length)]; }while(rc && pool.length>1 && pick.zh===rc.zh);
+  const card=$("rcard"), wasFlipped=card.classList.contains("flip");
+  rc = pick;
+  card.classList.remove("flip");
+  const fill = () => {
+    const t=themeOf(rc.theme);
+    card.style.setProperty("--tc", t.c);
+    $("rcBack").style.background = rcPick==="all" ? STRIPES : t.c;
+    $("rcTheme").textContent = `${t.n}・${t.zh}　${t.en}`;
+    $("rcZh").textContent=rc.zh; $("rcEn").textContent=rc.en;
+  };
+  if(wasFlipped && !matchMedia("(prefers-reduced-motion: reduce)").matches) setTimeout(fill, 450); else fill();
+  if(!wasFlipped) $("rcBack").style.background = rcPick==="all" ? STRIPES : themeOf(rcPick).c;
+  $("rcSave").disabled=true; $("rcHint").textContent="點卡片翻開"; $("rcErr").textContent="";
+}
+$("rainbowBtn").onclick = () => { rc=null; $("rcNote").value=""; renderThemeChips(); drawRainbow(); $("rainbowScrim").classList.add("open"); };
+$("rcard").onclick = () => { $("rcard").classList.add("flip"); $("rcSave").disabled=false; $("rcHint").textContent="喜歡這張的話，就存成日記吧。"; };
+$("rcAgain").onclick = drawRainbow;
+$("rcClose").onclick = closeSheets;
+$("rcSave").onclick = async () => {
+  if(!rc) return;
+  const now=new Date(), today=ymd(now), t=themeOf(rc.theme);
+  const note={id:"n"+now.getTime().toString(36)+Math.random().toString(36).slice(2,6), kind:"note", date:today,
+    time:`${pad(now.getHours())}:${pad(now.getMinutes())}`, created:now.getTime(), emo:null, emoji:"🌈", color:t.c, mood:4,
+    text:$("rcNote").value.trim(), tags:["彩虹卡", t.zh], place:"", quest:false, card:{zh:rc.zh, en:rc.en, theme:rc.theme}};
+  $("rcSave").disabled=true;
+  try{ await persist(note); closeSheets(); selected=today; view=new Date(now.getFullYear(), now.getMonth(), 1); render(); }
+  catch(e){ $("rcErr").textContent="沒有存成功，請再按一次。"; $("rcSave").disabled=false; }
+};
+
+/* ---------- 扭蛋 ---------- */
+const FILTERS=[{k:"all",n:"隨機"},{k:"sun",n:"開心的回憶"},{k:"rain",n:"低潮時的回憶"}];
+let gFilter="all";
+function renderGacha(){
+  const dome=$("dome");
+  if(!dome.childElementCount){
+    const spots=[[8,126],[46,140],[86,144],[126,138],[146,108],[24,92],[64,104],[104,102],[140,72],[44,62],[90,64]];
+    spots.forEach((p,i)=>{
+      const c=el("span","cap"), r=Math.round(Math.random()*360);
+      c.dataset.r=r; c.style.left=p[0]+"px"; c.style.top=p[1]+"px"; c.style.transform=`rotate(${r}deg)`;
+      c.style.setProperty("--cc", MOODS[(i*5)%MOODS.length].c); dome.append(c);
+    });
+  }
+  const box=$("gachaChips"); box.innerHTML="";
+  FILTERS.forEach(f=>{ const b=el("button","chip",f.n); b.setAttribute("aria-pressed",String(f.k===gFilter)); b.onclick=()=>{gFilter=f.k; renderGacha();}; box.append(b); });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function playGacha(color){
+  const out=$("outCap"); out.style.setProperty("--cc", color);
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches || !out.animate) return;
+  out.getAnimations({subtree:true}).forEach(a => a.cancel());
+  out.hidden=true;
+  $("knob").animate([{transform:"rotate(0)"},{transform:"rotate(360deg)"}], {duration:1000, easing:"cubic-bezier(.45,0,.25,1)"});
+  document.querySelectorAll("#dome .cap").forEach((c,i) => {
+    const r=+c.dataset.r, dx=()=>Math.random()*50-25, dy=()=>-(20+Math.random()*70);
+    c.animate([
+      {transform:`translate(0,0) rotate(${r}deg)`},
+      {transform:`translate(${dx()}px,${dy()}px) rotate(${r+100+Math.random()*120}deg)`, offset:.3},
+      {transform:`translate(${dx()}px,${dy()/2}px) rotate(${r+220}deg)`, offset:.6},
+      {transform:`translate(0,-6px) rotate(${r+330}deg)`, offset:.85},
+      {transform:`translate(0,0) rotate(${r+360}deg)`}
+    ], {duration:1100+Math.random()*300, delay:i*25, easing:"ease-in-out"});
+  });
+  await wait(1050);
+  out.hidden=false;
+  await out.animate([
+    {transform:"translateY(-34px) rotate(-40deg)", opacity:0},
+    {transform:"translateY(-22px) rotate(-10deg)", opacity:1, offset:.18},
+    {transform:"translateY(0) rotate(200deg)", offset:.55, easing:"ease-out"},
+    {transform:"translateY(-13px) rotate(270deg)", offset:.72, easing:"ease-in"},
+    {transform:"translateY(0) rotate(330deg)", offset:.86, easing:"ease-out"},
+    {transform:"translateY(-3px) rotate(352deg)", offset:.94},
+    {transform:"translateY(0) rotate(360deg)"}
+  ], {duration:900, fill:"forwards"}).finished;
+  await out.animate([{transform:"rotate(360deg)"},{transform:"rotate(348deg)"},{transform:"rotate(370deg)"},{transform:"rotate(360deg)"}], {duration:380, fill:"forwards"}).finished;
+  await wait(200);
+  const ease={duration:400, easing:"cubic-bezier(.2,.8,.3,1.25)", fill:"forwards"};
+  out.querySelector(".t").animate([{transform:"none"},{transform:"translate(-12px,-28px) rotate(-38deg)"}], ease);
+  await out.querySelector(".b").animate([{transform:"none"},{transform:"translate(9px,6px) rotate(18deg)"}], ease).finished;
+  await wait(250);
+  await out.animate([{opacity:1},{opacity:0}], {duration:250, fill:"forwards"}).finished;
+}
+$("knob").onclick = () => { if(!$("spin").disabled) $("spin").click(); };
+$("spin").onclick = async () => {
+  const today=ymd(new Date());
+  let pool = notes().filter(n => n.date !== today);
+  if(gFilter==="sun") pool=pool.filter(n=>n.mood>=4);
+  if(gFilter==="rain") pool=pool.filter(n=>n.mood<=2);
+  const older = pool.filter(n => daysBetween(n.date,today) >= 7);
+  if(older.length) pool = older;
+  const res=$("gachaResult"); res.innerHTML="";
+  const n = pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
+  $("spin").disabled=true;
+  await playGacha(n ? moodOf(n).c : MOODS[0].c);
+  $("spin").disabled=false;
+  if(!n){ res.append(el("p","empty","扭蛋機裡還沒有這種回憶。多收藏幾天，再來轉轉看！")); return; }
+    const wrap=el("div","result");
+    const ago=daysBetween(n.date,today), dt=parse(n.date);
+    wrap.append(el("div","ago",`${ago} 天前・${dt.getFullYear()} 年 ${dt.getMonth()+1} 月 ${dt.getDate()} 日`));
+    wrap.append(noteCard(n));
+    const go=el("button","btn","回到那一天"); go.onclick=()=>{ selected=n.date; view=new Date(dt.getFullYear(),dt.getMonth(),1); switchTab("diary"); };
+    const c=el("div"); c.style.textAlign="center"; c.append(go); wrap.append(c);
+    res.append(wrap);
+};
+
+/* ---------- 小星球 ---------- */
+function renderPlanet(){
+  const ns=notes(), days=new Set(ns.map(n=>n.date)).size;
+  const placed=ns.filter(n=>n.place).length, quests=ns.filter(n=>n.quest);
+  const study=ns.some(n=>(n.tags||[]).some(t=>/學|讀|書|課/.test(t)));
+  const rainbow=ns.some(n=>n.mood===5);
+  const level=1+Math.floor(days/5);
+  $("planetTitle").textContent = `我的小星球・第 ${level} 級`;
+  const objs=[];
+  const trees=Math.min(days,9), flowers=Math.min(placed,8);
+  for(let i=0;i<trees;i++) objs.push("🌳");
+  for(let i=0;i<flowers;i++) objs.push(["🌸","🌷","🌼"][i%3]);
+  if(days>=7) objs.push("🏠");
+  if(study) objs.push("📚");
+  if(ns.length>=15) objs.push("🐇");
+  if(ns.length>=30) objs.push("🐈");
+  if(!objs.length) objs.push("🌱");
+  // 交錯排列
+  const mixed=[]; const a=objs.slice(); while(a.length){ mixed.push(a.shift()); if(a.length) mixed.push(a.pop()); }
+  const cx=150, cy=185, r=92;
+  let svg=`<svg viewBox="0 0 300 300" role="img" aria-label="小星球上有 ${trees} 棵樹、${flowers} 朵花、${quests.length} 顆星星"><g class="bob">`;
+  const stars=Math.min(quests.length,14);
+  for(let i=0;i<stars;i++){ const x=20+((i*67)%260), y=18+((i*41)%70); svg+=`<text x="${x}" y="${y}" font-size="14">⭐</text>`; }
+  if(rainbow) svg+=`<text x="210" y="70" font-size="34">🌈</text>`;
+  svg+=`<ellipse cx="${cx}" cy="${cy+r+12}" rx="80" ry="8" fill="var(--dot)"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--sage)"/>`;
+  svg+=`<circle cx="${cx-30}" cy="${cy+20}" r="16" fill="var(--sage-d)" opacity=".5"/><circle cx="${cx+35}" cy="${cy+45}" r="10" fill="var(--sage-d)" opacity=".5"/><circle cx="${cx+20}" cy="${cy-5}" r="7" fill="var(--sage-d)" opacity=".4"/>`;
+  svg+=`<ellipse cx="${cx}" cy="${cy}" rx="${r+30}" ry="16" fill="none" stroke="var(--w4)" stroke-width="5" transform="rotate(-12 ${cx} ${cy})" opacity=".85"/>`;
+  const n=mixed.length, span=Math.min(150, 30+n*14);
+  mixed.forEach((e,i)=>{
+    const ang = n===1 ? -90 : -90 - span/2 + span*i/(n-1);
+    const rad=ang*Math.PI/180, x=cx+Math.cos(rad)*(r+4), y=cy+Math.sin(rad)*(r+4);
+    svg+=`<text x="${x}" y="${y}" font-size="24" text-anchor="middle" transform="rotate(${ang+90} ${x} ${y})">${e}</text>`;
+  });
+  svg+=`</g></svg>`;
+  $("planetSvg").innerHTML=svg;
+  const st=$("planetStats"); st.innerHTML="";
+  [[days,"記錄天數"],[ns.length,"生活碎片"],[quests.length,"收藏卡"]].forEach(([v,l])=>{ const d=el("div"); d.append(el("b",null,v), el("span",null,l)); st.append(d); });
+  $("cardsTitle").textContent = `生活收藏卡（${quests.length} / ${QUESTS.length} 種）`;
+  const cards=$("cards"); cards.innerHTML="";
+  if(!quests.length){ cards.append(el("p","empty","完成日記頁上方的小冒險，就能收集到第一張卡。")); return; }
+  quests.sort((a,b)=>b.date.localeCompare(a.date)).forEach(nq=>{
+    const q=questFor(nq.date), c=el("div","qcard"); c.style.background=moodOf(nq).c;
+    c.append(el("span","e",q[0]), el("span",null,q[1]), el("small",null,nq.date.replace(/-/g,"/")));
+    cards.append(c);
+  });
+}
+
+/* ---------- 未來信 ---------- */
+function renderLetters(){
+  const box=$("letters"); box.innerHTML=""; const now=Date.now();
+  const ls=letters().sort((a,b)=>a.openAt-b.openAt);
+  if(!ls.length){ box.append(el("p","empty","還沒有信。寫一封，讓未來的你收到驚喜。")); return; }
+  ls.forEach(l=>{
+    const open=now>=l.openAt, d=el("div","letter");
+    const od=new Date(l.openAt), wd=new Date(l.created);
+    const body=el("div","grow");
+    if(open){
+      body.append(el("strong",null,`來自 ${wd.getFullYear()}/${wd.getMonth()+1}/${wd.getDate()} 的你`), el("p",null,l.text));
+    }else{
+      const ms=l.openAt-now, left = ms<86400000 ? `${Math.max(1,Math.ceil(ms/3600000))} 小時` : `${Math.ceil(ms/86400000)} 天`;
+      body.append(el("strong",null,`還要 ${left}才能打開`), el("div","muted",`${od.getFullYear()}/${od.getMonth()+1}/${od.getDate()} ${pad(od.getHours())}:${pad(od.getMinutes())} 拆封・寫於 ${wd.getFullYear()}/${wd.getMonth()+1}/${wd.getDate()}`));
+    }
+    d.append(el("span","e",open?"💌":"🔒"), body);
+    box.append(d);
+  });
+}
+const localDT = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+$("letterWhen").onchange = () => {
+  const custom = $("letterWhen").value === "custom";
+  $("customWhen").hidden = !custom;
+  if(custom){
+    const now=new Date(); $("letterDate").min = localDT(new Date(now.getTime()+60000));
+    if(!$("letterDate").value){ const d=new Date(now); d.setMonth(d.getMonth()+1); d.setHours(9,0,0,0); $("letterDate").value = localDT(d); }
+  }
+};
+$("newLetter").onclick=()=>{ $("letterWhen").value="90"; $("customWhen").hidden=true; $("letterDate").value=""; $("letterText").value=""; $("letterErr").textContent=""; $("letterScrim").classList.add("open"); setTimeout(()=>$("letterText").focus(),60); };
+$("tplLetter").onclick=()=>{
+  if($("letterText").value.trim() && !confirm("要用範本取代目前寫的內容嗎？")) return;
+  $("letterText").value = "親愛的未來的我：\n\n現在的我，最在意的事是……\n最近讓我開心的一件小事是……\n我正在努力的是……\n\n不知道你現在過得怎麼樣？\n不管如何，我想對你說：\n";
+};
+$("letterSave").onclick=async()=>{
+  const text=$("letterText").value.trim();
+  if(!text){ $("letterErr").textContent="信還是空的。"; return; }
+  const now=Date.now(); let openAt;
+  if($("letterWhen").value==="custom"){
+    const v=$("letterDate").value; openAt = v ? new Date(v).getTime() : NaN;
+    if(isNaN(openAt)){ $("letterErr").textContent="請選一個拆封的日期和時間。"; return; }
+    if(openAt<=now){ $("letterErr").textContent="拆封時間要在未來，請再選一次。"; return; }
+  } else openAt = now + Number($("letterWhen").value)*86400000;
+  const l={id:"l"+now.toString(36)+Math.random().toString(36).slice(2,6), kind:"letter", text, created:now, openAt};
+  try{ await persist(l); closeSheets(); }catch(e){ $("letterErr").textContent="沒有封存成功，請再按一次。"; }
+};
+
+/* ---------- 報告 ---------- */
+function lastWeek(){
+  const t=new Date(), out=[];
+  for(let i=6;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i); out.push(ymd(d)); }
+  return out;
+}
+function renderReport(){
+  const week=lastWeek(), recorded=week.map(d=>({d, list:notesOn(d)})).filter(x=>x.list.length);
+  let f;
+  if(!recorded.length) f="這週還沒有天氣資料。收藏幾個生活碎片，就會開始播報。";
+  else{
+    const cnt={}; recorded.forEach(x=>{ const m=dominant(x.list); (cnt[m.k]=cnt[m.k]||{m, c:0}).c++; });
+    const parts=Object.values(cnt).sort((a,b)=>b.c-a.c).map(({m,c})=>`${m.e} ${c} 天`);
+    const last=recorded[recorded.length-1], lw=dominant(last.list), ld=parse(last.d);
+    const avg=recorded.reduce((s,x)=>s+dominant(x.list).v,0)/recorded.length;
+    const sky=avg>=4.5?"🌈 彩虹":avg>=3.7?"☀️ 晴朗":avg>=2.9?"⛅ 多雲":avg>=2?"🌦️ 有陣雨":"🌀 颱風來襲";
+    f=`本週整體天氣：${sky}\n過去七天有 ${recorded.length} 天留下紀錄：${parts.join("、")}。\n最近一次是星期${"日一二三四五六"[ld.getDay()]}，${lw.e}。`;
+  }
+  $("forecast").textContent=f;
+  const mv=$("movie"); mv.innerHTML="";
+  if(recorded.length){
+    const wn=week.flatMap(d=>notesOn(d));
+    const tc={}; wn.forEach(n=>(n.tags||[]).filter(t=>t!=="彩虹卡"&&t!=="小冒險"&&!THEMES.some(h=>h.zh===t)).forEach(t=>tc[t]=(tc[t]||0)+1));
+    const top=Object.entries(tc).sort((a,b)=>b[1]-a[1])[0];
+    const pc={}; wn.forEach(n=>{ if(n.place) pc[n.place]=(pc[n.place]||0)+1; });
+    const topP=Object.entries(pc).sort((a,b)=>b[1]-a[1])[0];
+    const title = top ? `關於「${top[0]}」的一週` : topP ? `在${topP[0]}的日子` : "一個普通但不壞的一週";
+    mv.append(el("div","movie",`🎬 本週上映：《${title}》`));
+  }
+
+  const y=reportYear; $("yearTitle").textContent=`${y} 年度生活報告`;
+  const ys=notes().filter(n=>n.date.startsWith(y+"-"));
+  const st=$("yearStats"); st.innerHTML="";
+  const tagCnt={}; ys.forEach(n=>(n.tags||[]).forEach(t=>tagCnt[t]=(tagCnt[t]||0)+1));
+  const topTag=Object.entries(tagCnt).sort((a,b)=>b[1]-a[1])[0];
+  const mCnt={}; ys.forEach(n=>{ const m=+n.date.slice(5,7); mCnt[m]=(mCnt[m]||0)+1; });
+  const topM=Object.entries(mCnt).sort((a,b)=>b[1]-a[1])[0];
+  const pCnt={}; ys.forEach(n=>{ if(n.place) pCnt[n.place]=(pCnt[n.place]||0)+1; });
+  const topP=Object.entries(pCnt).sort((a,b)=>b[1]-a[1])[0];
+  const sky=ys.filter(n=>/天空|雲|夕陽/.test(n.text)).length;
+  const stat=(big,label)=>{ const d=el("div","stat"); d.append(el("span","big",big), el("span","muted",label)); st.append(d); };
+  stat(new Set(ys.map(n=>n.date)).size, "天有留下紀錄");
+  stat(ys.length, "個生活碎片");
+  stat(ys.filter(n=>n.mood>=4).length, "次好心情");
+  stat(topTag ? "#"+topTag[0] : "—", topTag ? `最常出現的標籤，${topTag[1]} 次` : "還沒有標籤");
+  stat(topM ? topM[0]+" 月" : "—", topM ? `記錄最多的月份，${topM[1]} 張` : "記錄最多的月份");
+  stat(topP ? topP[0] : "—", topP ? `最常去的地方，${topP[1]} 次` : "最常去的地方");
+  if(sky) stat(sky, "次寫到天空或夕陽");
+  weatherBar(ys, $("yearBar"), $("yearLegend"));
+
+  const pl=$("places"); pl.innerHTML="";
+  const all={}; notes().forEach(n=>{ if(n.place)(all[n.place]=all[n.place]||[]).push(n); });
+  const entries=Object.entries(all).sort((a,b)=>b[1].length-a[1].length);
+  if(!entries.length){ pl.append(el("p","empty","在便利貼填上地點，這裡就會長出你的回憶座標。")); return; }
+  entries.forEach(([p,list])=>{
+    const b=el("button","place"); const dom=dominant(list);
+    b.append(el("span",null,"📍"), el("span","grow",p), el("span","muted",`${dom.e} ${list.length} 個故事`));
+    const box=el("div","place-notes wall"); box.hidden=true;
+    b.setAttribute("aria-expanded","false");
+    b.onclick=()=>{
+      box.hidden=!box.hidden; b.setAttribute("aria-expanded",String(!box.hidden));
+      if(!box.hidden && !box.childElementCount) list.sort((a,b)=>b.date.localeCompare(a.date)).forEach(n=>{ const c=noteCard(n); const t=c.querySelector(".top span"); t.textContent=n.date.replace(/-/g,"/")+" "+n.time; box.append(c); });
+    };
+    pl.append(b, box);
+  });
+}
+$("yPrev").onclick=()=>{ reportYear--; renderReport(); };
+$("yNext").onclick=()=>{ reportYear++; renderReport(); };
+/* ---------- 分頁 ---------- */
+function switchTab(t){
+  tab=t;
+  document.querySelectorAll(".tab").forEach(s=>s.classList.toggle("on", s.id==="tab-"+t));
+  document.querySelectorAll("#nav button").forEach(b=>{ if(b.dataset.tab===t) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  $("fab").hidden = t!=="diary";
+  render(); scrollTo(0,0);
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+function render(){
+  if(tab==="diary") renderDiary();
+  if(tab==="gacha") renderGacha();
+  if(tab==="planet") renderPlanet();
+  if(tab==="letters") renderLetters();
+  if(tab==="report") renderReport();
+}
+
+/* ---------- 設定與備份 ---------- */
+function openSettings(msg){
+  $("cfgUrl").value = cfg.url; $("cfgKey").value = cfg.key; $("cfgErr").textContent = msg || "";
+  $("setScrim").classList.add("open");
+}
+$("gear").onclick = () => openSettings();
+$("cfgClose").onclick = closeSheets;
+$("cfgSave").onclick = async () => {
+  const url = $("cfgUrl").value.trim(), key = $("cfgKey").value;
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/[^\s]+\/exec$/.test(url)){ $("cfgErr").textContent = "網址要是 https://script.google.com/macros/s/…/exec 這種格式。"; return; }
+  if(!key){ $("cfgErr").textContent = "請輸入密碼。"; return; }
+  cfg = {url, key}; lsSet(LS.cfg, cfg);
+  $("cfgSave").disabled = true; $("cfgErr").textContent = "連線中…";
+  syncState = "idle"; await sync();
+  $("cfgSave").disabled = false;
+  if(syncState === "idle") closeSheets();
+  else if(syncState === "offline") $("cfgErr").textContent = "目前沒有網路，連上網路後會自動同步。";
+  else if(syncState === "error") $("cfgErr").textContent = "連線失敗，請確認網址是否正確。";
+};
+$("exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify({app:"日常收藏家", version:1, exported:new Date().toISOString(), items}, null, 2)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `日常收藏家_備份_${ymd(new Date())}.json`;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  $("cfgErr").textContent = `已匯出 ${items.length} 筆。`;
+};
+$("importFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if(!f) return;
+  try{
+    const data = JSON.parse(await f.text()), arr = Array.isArray(data) ? data : data.items;
+    if(!Array.isArray(arr)) throw 0;
+    const ok = arr.filter(x => x && x.id && (x.kind === "letter" || x.date));
+    ok.forEach(x => {
+      x.kind = x.kind || "note"; x.photo = null;
+      const i = items.findIndex(y => y.id === x.id); if(i >= 0) items[i] = x; else items.push(x);
+      queue = queue.filter(q => !(q.op==="save" && q.item.id===x.id)).concat({op:"save", item:x});
+    });
+    saveLocal(); render(); showStatus(); $("cfgErr").textContent = `已匯入 ${ok.length} 筆。`; sync();
+  }catch(err){ $("cfgErr").textContent = "這個檔案看起來不是日常收藏家的備份檔。"; }
+};
+$("logoutBtn").onclick = () => {
+  const n = queue.length;
+  if(!confirm(n ? `還有 ${n} 筆還沒同步到 Google 試算表，登出會一起清除。確定要登出嗎？` : "登出後，這台裝置上的密碼和暫存資料會清除，Google 試算表裡的日記不受影響。確定嗎？")) return;
+  Object.values(LS).forEach(k => localStorage.removeItem(k));
+  items = []; queue = []; cfg = {url:API_DEFAULT, key:""}; syncState = "idle";
+  render(); showStatus(); openSettings("已登出這台裝置。");
+};
+
+loadLocal(); render(); showStatus();
+if(cfg.key) sync(); else setTimeout(() => openSettings("輸入密碼，就能連接你的 Google 試算表。也可以先關閉，之後再從右上角的 ⚙️ 設定。"), 300);
+addEventListener("online", () => sync());
+addEventListener("offline", () => { syncState = "offline"; showStatus(); });
+document.addEventListener("visibilitychange", () => { if(!document.hidden && Date.now() - lastSync > 30000) sync(); });
+if("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+
+</script>
+</body>
+</html>

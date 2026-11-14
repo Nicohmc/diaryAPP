@@ -1,0 +1,16 @@
+{
+  "name": "日常收藏家",
+  "short_name": "日常收藏家",
+  "description": "把普通的生活，收藏成值得回味的故事",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2E8E6",
+  "theme_color": "#F2E8E6",
+  "lang": "zh-Hant",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
