@@ -370,6 +370,7 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
       <label class="btn soft" style="display:inline-flex; align-items:center; cursor:pointer">📷 加照片<input type="file" id="photo" accept="image/*" hidden></label>
       <button class="btn soft" id="rmPhoto" hidden>移除照片</button>
     </div>
+    <label class="field">日期（寫錯了可以在這裡改）<input type="date" id="noteDate"></label>
     <div class="two">
       <label class="field">地點<input id="place" placeholder="巷口咖啡廳"></label>
       <label class="field">標籤（空格分開）<input id="tags" placeholder="小確幸 散步"></label>
@@ -734,6 +735,7 @@ function openNote(n, opts={}){
   $("text").value = n ? n.text : "";
   $("tags").value = n && n.tags ? n.tags.join(" ") : (opts.quest ? "小冒險" : "");
   $("place").value = n && n.place || "";
+  $("noteDate").max = ymd(new Date()); $("noteDate").value = n ? n.date : selected;
   discardPick(); $("photoPrev").hidden = true; $("photoPrev").removeAttribute("src"); $("rmPhoto").hidden = !(n && photoKey(n));
   if(n && photoKey(n)) photoGet(n).then(url => { if(url && editing===n.id && !formPhoto.changed){ $("photoPrev").src = url; $("photoPrev").hidden = false; } });
   $("qbanner").hidden = !questFlag;
@@ -788,6 +790,9 @@ $("emojiIn").onblur = () => { $("emojiIn").value = cur.e; };
 $("colorIn").oninput = e => { cur.c = e.target.value; renderWeatherPicker(); };
 $("save").onclick = async () => {
   const text=$("text").value.trim();
+  const dateVal=$("noteDate").value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateVal)){ $("noteErr").textContent="請選擇日期。"; return; }
+  if(dateVal > ymd(new Date())){ $("noteErr").textContent="日期不能比今天晚，請重新選擇。"; return; }
   const prev = editing ? items.find(x=>x.id===editing) : null;
   const hasPhoto = formPhoto.changed ? !formPhoto.removed : !!(prev && photoKey(prev));
   if(!text && !(prev && prev.card) && !hasPhoto){ $("noteErr").textContent="寫一句話或放一張照片，就能貼上了。"; return; }
@@ -795,11 +800,14 @@ $("save").onclick = async () => {
   const old = prev, now=new Date();
   const note = {...(old||{
     id:"n"+now.getTime().toString(36)+Math.random().toString(36).slice(2,6), kind:"note",
-    date:selected, time:`${pad(now.getHours())}:${pad(now.getMinutes())}`, created:now.getTime()
-  }), emo:null, emoji:cur.e, color:cur.c, mood:cur.v, text, tags, place:$("place").value.trim(), quest:questFlag,
+    time:`${pad(now.getHours())}:${pad(now.getMinutes())}`, created:now.getTime()
+  }), date:dateVal, emo:null, emoji:cur.e, color:cur.c, mood:cur.v, text, tags, place:$("place").value.trim(), quest:questFlag,
     ...(formPhoto.changed ? {photoId:"", photoRef: formPhoto.removed ? null : formPhoto.ref} : {})};
   $("save").disabled=true;
-  try{ await persist(note); formPhoto={changed:false, removed:false, ref:null}; closeSheets(); }
+  try{
+    await persist(note); formPhoto={changed:false, removed:false, ref:null}; closeSheets();
+    const nd=parse(note.date); selected=note.date; view=new Date(nd.getFullYear(), nd.getMonth(), 1); render();
+  }
   catch(e){ $("noteErr").textContent = e.message==="full" ? "裝置空間不夠了，試著刪掉一些舊的便利貼再貼上。" : "沒有存成功，請再按一次。"; }
   finally{ $("save").disabled=false; }
 };
