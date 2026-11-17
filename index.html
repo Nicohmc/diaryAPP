@@ -161,6 +161,11 @@ textarea.bin{min-height:76px; resize:vertical; font-family:var(--hand)}
 .bprev[hidden]{display:none}
 .bprev{display:block; max-width:100%; max-height:200px; border-radius:10px; border:4px solid var(--bg); margin-bottom:8px}
 .dim{opacity:.55}
+.fcard{background:var(--bg); border-radius:18px; padding:12px 14px 14px; margin-bottom:12px}
+.fhead{margin:0 0 10px; font-weight:400; font-size:1rem}
+.fcard .bin{background:var(--surface)}
+.fcard .picked{background:var(--surface)}
+.fcard .mlabel:first-child{margin-top:0}
 .bttoggle{display:flex; align-items:center; gap:12px; background:var(--bg); border-radius:16px; padding:12px 14px; margin-bottom:16px; cursor:pointer}
 .bttoggle input{position:absolute; opacity:0; width:1px; height:1px}
 .bttoggle .sw{flex:none; width:46px; height:28px; border-radius:999px; background:var(--line); position:relative; transition:background .2s}
@@ -1482,20 +1487,18 @@ function openBt(entry, prefill, opts = {}){
   const iceHtml = ICE.map(s => `<button type="button" class="chip" data-ice="${s}" aria-pressed="false">${s}</button>`).join("") + '<button type="button" class="chip" data-icecustom="1" aria-pressed="false">自己寫</button>';
   const starBtns = [1,2,3,4,5].map(i => `<button type="button" data-star="${i}" aria-label="${i} 顆星">★</button>`).join("");
   $("btSheet").innerHTML = `<h3 id="btTitle"></h3>
-    <div class="bsec"><div class="lg">選個圖示</div><div class="dicons" id="uIcons"></div>
-      <label class="emo-field">自選 emoji<input id="uEmoji" aria-label="自選 emoji" autocomplete="off"></label></div>
     <label class="bttoggle"><input type="checkbox" id="uBt" role="switch"><span class="sw" aria-hidden="true"></span>
       <span class="tt">🧋 加入手搖紀錄<small>記下店家、甜度冰塊和評分，會出現在手搖紀錄和口袋名單</small></span></label>
+    <div class="bsec" id="iconSec"><div class="lg" id="iconLbl">選個圖示</div><div class="dicons" id="uIcons"></div>
+      <label class="emo-field">自選 emoji<input id="uEmoji" aria-label="自選 emoji" autocomplete="off"></label></div>
     <div id="plainSec" class="bsec"><label class="field" style="margin-top:0">名稱（可不填）<input id="uName" value="${esc(entry && !entry.shop ? entry.name || "" : "")}" autocomplete="off"></label></div>
     <div id="btSec">
-      <div class="bsec" id="secShop"></div>
-      <div class="bsec" id="secDrink" hidden></div>
-      <div id="secSpec" hidden>
-        <div class="hintbox" id="lastBox" hidden></div>
-        <div class="bsec"><div class="lg">甜度</div><div class="bchips">${sugarHtml}</div><input class="bin" id="bSugar" style="margin-top:8px" placeholder="例如：二分糖、糖少一點" aria-label="自訂甜度" autocomplete="off" hidden></div>
-        <div class="bsec"><div class="lg">冰塊</div><div class="bchips">${iceHtml}</div><input class="bin" id="bIce" style="margin-top:8px" placeholder="例如：去冰但加一點冰粒" aria-label="自訂冰塊" autocomplete="off" hidden></div>
-        <div class="bsec"><div class="lg">給幾顆星<span id="starLbl"></span></div><div class="starpick">${starBtns}</div></div>
-      </div>
+      <section class="fcard"><h4 class="fhead">🏪 哪一間店</h4><div id="secShop"></div></section>
+      <section class="fcard"><h4 class="fhead">🧋 喝了什麼</h4><div id="secDrink"></div></section>
+      <div class="hintbox" id="lastBox" hidden></div>
+      <section class="fcard" id="sugarCard"><h4 class="fhead">🍯 甜度</h4><div class="bchips">${sugarHtml}</div><input class="bin" id="bSugar" style="margin-top:8px" placeholder="例如：二分糖、糖少一點" aria-label="自訂甜度" autocomplete="off" hidden></section>
+      <section class="fcard"><h4 class="fhead">🧊 冰塊</h4><div class="bchips">${iceHtml}</div><input class="bin" id="bIce" style="margin-top:8px" placeholder="例如：去冰但加一點冰粒" aria-label="自訂冰塊" autocomplete="off" hidden></section>
+      <section class="fcard"><h4 class="fhead">⭐ 給幾顆星<span id="starLbl"></span></h4><div class="starpick">${starBtns}</div></section>
     </div>
     <div class="bsec"><label class="lg" for="bNote" id="noteLbl"></label><textarea class="bin" id="bNote">${esc(entry ? entry.note : "")}</textarea></div>
     <div class="two bsec"><label class="field" style="margin-top:0">日期<input type="date" id="bDate" value="${esc(entry ? entry.date : dSel)}" max="${ymd(new Date())}"></label><label class="field" style="margin-top:0">時間<input type="time" id="bTime" value="${esc(entry ? entry.time || "" : nowHM())}"></label></div>
@@ -1521,21 +1524,23 @@ function applyMode(){
   if(!bf) return;
   $("uBt").checked = bf.bt;
   $("plainSec").hidden = bf.bt; $("btSec").hidden = !bf.bt;
+  const ic = $("iconSec"); if(bf.bt) $("btSec").after(ic); else $("plainSec").before(ic);
+  $("iconLbl").textContent = bf.bt ? "圖示（預設 🧋，也可以換）" : "選個圖示";
   $("noteLbl").textContent = bf.bt ? "小筆記（寫給下次的自己）" : "備註";
   $("bNote").placeholder = bf.bt ? "例如：珍珠很Q，下次加波霸；茶底偏淡，少冰剛好" : "心得、店家、跟誰一起喝……";
   $("btTitle").textContent = (bf.id ? "編輯這杯" : "記一杯") + (bf.bt ? "手搖" : "飲料");
   bUpdateSave();
 }
-function bShow(){ if(!bf) return; $("secDrink").hidden = !bf.shop; $("secSpec").hidden = !bf.drink; }
+function bShow(){}
 function bUpdateSave(){ const s = $("bSave"); if(s && bf) s.classList.toggle("dim", bf.bt && !(bf.shop && bf.drink)); }
 function optChip(attr, name, extra){ return `<button type="button" class="chip" data-${attr}="${esc(name)}">${esc(name)}${extra || ""}</button>`; }
 function useChip(attr, q){ return `<div class="bchips" style="margin-top:10px"><button type="button" class="chip" data-${attr}="${esc(q)}">＋ 使用「${esc(q)}」</button></div>`; }
 function renderBShop(){
   const box = $("secShop"); if(!box || !bf) return;
   if(bf.shop && !bf.pickShop){
-    box.innerHTML = `<div class="lg">哪一間店</div><div class="picked"><span class="pk">${esc(bf.shop)}</span><button type="button" class="linkbtn" id="chgShop">更換</button></div>`;
+    box.innerHTML = `<div class="picked"><span class="pk">${esc(bf.shop)}</span><button type="button" class="linkbtn" id="chgShop">更換</button></div>`;
   }else{
-    box.innerHTML = '<div class="lg">哪一間店</div><input class="bin" id="shopQ" placeholder="搜尋店名，或直接輸入" autocomplete="off"><div id="shopOpts"></div>';
+    box.innerHTML = '<input class="bin" id="shopQ" placeholder="搜尋店名，或直接輸入" autocomplete="off"><div id="shopOpts"></div>';
     renderBShopOpts();
   }
 }
@@ -1552,20 +1557,17 @@ function renderBShopOpts(){
 }
 function pickShop(name){
   name = String(name || "").trim(); if(!name || !bf) return;
-  const changed = !!bf.shop && bf.shop !== name;
   bf.shop = name; bf.pickShop = false;
-  if(changed && !bf.id){ bf.drink = ""; bf.sugar = ""; bf.ice = ""; bf.sugarCustom = false; bf.iceCustom = false; bf.autofilled = false; }
   if(!bf.drink) bf.pickDrink = true;
   renderBShop(); renderBDrink(); bShow(); bSyncChips(); bRenderLast(); bUpdateSave();
   const dq = $("drinkQ"); if(dq) setTimeout(() => $("secDrink").scrollIntoView({behavior:"smooth", block:"start"}), 30);
 }
 function renderBDrink(){
   const box = $("secDrink"); if(!box || !bf) return;
-  if(!bf.shop){ box.innerHTML = ""; return; }
   if(bf.drink && !bf.pickDrink){
-    box.innerHTML = `<div class="lg">喝了什麼</div><div class="picked"><span class="pk">${esc(bf.drink)}</span><button type="button" class="linkbtn" id="chgDrink">更換</button></div>`;
+    box.innerHTML = `<div class="picked"><span class="pk">${esc(bf.drink)}</span><button type="button" class="linkbtn" id="chgDrink">更換</button></div>`;
   }else{
-    box.innerHTML = '<div class="lg">喝了什麼</div><input class="bin" id="drinkQ" placeholder="搜尋菜單，或直接輸入飲料名稱" autocomplete="off"><div id="drinkOpts"></div>';
+    box.innerHTML = '<input class="bin" id="drinkQ" placeholder="搜尋菜單，或直接輸入飲料名稱" autocomplete="off"><div id="drinkOpts"></div>';
     renderBDrinkOpts();
   }
 }
@@ -1582,7 +1584,7 @@ function renderBDrinkOpts(){
   if(hs.length) h += '<div class="mlabel">你在這間喝過的</div><div class="bchips">' + hs.map(x => optChip("pickdrink", x.name, x.avg ? `<span class="fav">★${x.avg}</span>` : "")).join("") + "</div>";
   const ms = menuRest.filter(match);
   if(ms.length) h += `<div class="mlabel">${esc(bf.shop)} 的菜單</div><div class="bchips">` + ms.map(m => optChip("pickdrink", m)).join("") + "</div>";
-  if(!menu.length && !q) h += '<div class="mlabel">這間店的菜單還沒收錄，可以從常見飲料選，或直接輸入名稱</div>';
+  if(!menu.length && !q) h += bf.shop ? '<div class="mlabel">這間店的菜單還沒收錄，可以從常見飲料選，或直接輸入名稱</div>' : '<div class="mlabel">選了店家會出現那間的菜單；也可以先從常見飲料選，或直接輸入</div>';
   const showGen = !menu.length || nq || bf.genOpen, gs = genRest.filter(match);
   if(showGen && gs.length) h += '<div class="mlabel">常見飲料</div><div class="bchips">' + gs.map(g => optChip("pickdrink", g)).join("") + "</div>";
   if(menu.length && !nq) h += `<div class="bchips" style="margin-top:10px"><button type="button" class="chip" data-togglegen="1">${bf.genOpen ? "收起常見飲料 ▴" : "更多常見飲料 ▾"}</button></div>`;
@@ -1596,7 +1598,7 @@ function pickDrinkB(name){
     if(last){ bf.sugar = last.sugar || ""; bf.ice = last.ice || ""; bf.sugarCustom = !!bf.sugar && !SUGAR.includes(bf.sugar); bf.iceCustom = !!bf.ice && !ICE.includes(bf.ice); bf.autofilled = true; }
   }
   renderBDrink(); bShow(); bSyncChips(); bRenderLast(); bUpdateSave();
-  setTimeout(() => { const s = $("secSpec"); if(s) s.scrollIntoView({behavior:"smooth", block:"start"}); }, 30);
+  setTimeout(() => { const s = $("sugarCard"); if(s && bf && bf.bt) s.scrollIntoView({behavior:"smooth", block:"start"}); }, 30);
 }
 function bRenderLast(){
   const box = $("lastBox"); if(!box || !bf) return;
