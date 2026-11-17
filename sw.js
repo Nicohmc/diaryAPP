@@ -1,5 +1,5 @@
-// 更新網站內容後，把下面的 v4 改成 v5、v6…，手機才會抓到新版
-const CACHE = "sd-v4";
+// 更新網站內容後，把下面的 v5 改成 v6、v7…，手機才會抓到新版
+const CACHE = "sd-v5";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

@@ -89,6 +89,30 @@ h2{font-size:1.15rem; font-weight:400; margin:0 0 10px}
 .quest .qe{font-size:1.8rem}
 .quest small{display:block; opacity:.75}
 .quest .btn{background:rgba(255,255,255,.6); border-color:transparent; color:var(--note-ink); white-space:nowrap}
+.drinkwrap .quickhint{margin:0 0 10px}
+.dgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+.dbtn{border:2px solid var(--line); background:var(--surface); border-radius:16px; padding:8px 2px 6px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:.72rem; color:var(--muted); min-height:64px}
+.dbtn b{font-size:1.7rem; font-weight:400; line-height:1.2}
+.dbtn:active{transform:scale(.94)}
+.dcard{display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:0; border-radius:18px; padding:12px; margin-bottom:10px; cursor:pointer; color:var(--note-ink); box-shadow:var(--shadow)}
+.dcard .de{font-size:2rem; line-height:1}
+.dcard .dt{flex:1; min-width:0}
+.dcard .dt strong{font-weight:400; font-size:1rem; display:block}
+.dcard .dt small{display:block; opacity:.75; font-size:.78rem; word-break:break-word}
+.dthumb,.dph{width:64px; height:64px; border-radius:12px; flex:none}
+.dthumb{object-fit:cover; border:3px solid rgba(255,255,255,.7)}
+.dph{background:rgba(255,255,255,.45); display:grid; place-items:center; font-size:1.2rem}
+.day.dhas .n{background:var(--peach); color:var(--note-ink)}
+.day:disabled{opacity:.35; cursor:default}
+.dicons{display:grid; grid-template-columns:repeat(8,1fr); gap:6px; margin-bottom:10px}
+.dicons button{border:2px solid transparent; border-radius:12px; padding:3px 0; font-size:1.35rem; line-height:1.4; cursor:pointer; background:var(--bg)}
+.dicons button[aria-pressed="true"]{border-color:var(--ink); background:var(--peach)}
+.toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(88px + env(safe-area-inset-bottom,0px)); z-index:30; background:var(--ink); color:var(--surface); border-radius:999px; padding:6px 8px 6px 16px; display:flex; align-items:center; gap:10px; font-size:.9rem; box-shadow:0 8px 20px -8px rgba(0,0,0,.5); max-width:92vw}
+.toast[hidden]{display:none}
+.toast .btn{min-height:30px; padding:2px 12px; background:var(--surface); color:var(--ink); border-color:transparent}
+.drinkwrap{display:flex; flex-direction:column}
+.drinkwrap > .side{order:2; margin-top:16px}
+@media (min-width:820px){ .drinkwrap{display:grid; grid-template-columns:350px 1fr; gap:28px; align-items:start} .drinkwrap > .side{order:0; margin-top:0; position:sticky; top:calc(14px + env(safe-area-inset-top,0px))} }
 .daytitle{display:flex; align-items:baseline; gap:10px; margin:4px 0 14px}
 .daytitle h2{font-family:var(--hand); font-size:1.5rem; margin:0}
 .wall{display:grid; grid-template-columns:1fr; gap:16px; max-width:560px}
@@ -119,7 +143,7 @@ nav{
   position:fixed; left:0; right:0; bottom:0; z-index:8; background:var(--surface); border-top:2px solid var(--line);
   padding:6px 6px env(safe-area-inset-bottom,0px); display:flex; justify-content:center
 }
-nav .in{display:grid; grid-template-columns:repeat(5,1fr); width:100%; max-width:560px}
+nav .in{display:grid; grid-template-columns:repeat(6,1fr); width:100%; max-width:560px}
 nav button{border:0; background:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:4px 0 6px; font-size:.72rem; color:var(--muted); border-radius:14px}
 nav button b{font-size:1.35rem; line-height:1.3; font-weight:400}
 nav button[aria-current="page"]{color:var(--ink); background:var(--bg)}
@@ -314,6 +338,39 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
   </section>
 
   <!-- 報告 -->
+  <!-- 飲料 -->
+  <section class="tab" id="tab-drink">
+    <div class="drinkwrap">
+      <div class="side">
+        <div class="card">
+          <div class="cal-head">
+            <button class="btn icon" id="dPrev" aria-label="上個月">‹</button>
+            <div class="month" id="dMonthLabel"></div>
+            <button class="btn" id="dToday">今天</button>
+            <button class="btn icon" id="dNext" aria-label="下個月">›</button>
+          </div>
+          <div class="dow"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+          <div class="days" id="dDays"></div>
+        </div>
+        <div class="card">
+          <h2 id="dMonthTitle"></h2>
+          <div class="wbar" id="dBar"></div>
+          <div class="legend" id="dLegend"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h2 id="dQuickTitle"></h2>
+          <p class="muted quickhint" style="font-size:.8rem">點一下圖示就記錄一杯；想拍照或補充說明，按下面的按鈕。</p>
+          <div class="dgrid" id="dGrid"></div>
+          <div class="row" style="margin-top:12px"><button class="btn main grow" id="dPhotoBtn">📷 拍照記錄</button><button class="btn" id="dMore">✏️ 詳細記錄</button></div>
+        </div>
+        <div class="daytitle"><h2 id="dDayLabel"></h2><small class="muted" id="dDayCount"></small></div>
+        <div id="dList"></div>
+      </div>
+    </div>
+  </section>
+
   <section class="tab" id="tab-report">
     <div class="card">
       <h2>心情氣象報告</h2>
@@ -341,6 +398,7 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
 
 <nav aria-label="主選單"><div class="in" id="nav">
   <button data-tab="diary" aria-current="page"><b>📅</b>日記</button>
+  <button data-tab="drink"><b>🥤</b>飲料</button>
   <button data-tab="gacha"><b>🎰</b>扭蛋</button>
   <button data-tab="planet"><b>🪐</b>小星球</button>
   <button data-tab="letters"><b>💌</b>未來信</button>
@@ -430,6 +488,35 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
   </div>
 </div>
 
+<!-- 飲料表單 -->
+<div class="scrim" id="drinkScrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <h3 id="dTitle">記錄一杯飲料</h3>
+    <div class="dicons" id="dIcons"></div>
+    <div class="row" style="margin-bottom:6px"><label class="emo-field">自選 emoji<input id="dEmoji" aria-label="自選 emoji" autocomplete="off"></label></div>
+    <label class="field">名稱（可不填）<input id="dName" placeholder="例如：多多綠茶"></label>
+    <label class="field">備註<input id="dNote" placeholder="甜度、冰量、店家……"></label>
+    <div class="two">
+      <label class="field">日期<input type="date" id="dDate"></label>
+      <label class="field">時間<input type="time" id="dTime"></label>
+    </div>
+    <div class="paper" style="margin-top:12px; background:var(--bg)"><img id="dPrev2" alt="這杯飲料的照片" hidden></div>
+    <div class="row" style="margin-top:10px">
+      <label class="btn soft" style="display:inline-flex; align-items:center; cursor:pointer">📷 拍照或選照片<input type="file" id="dPhoto" accept="image/*" hidden></label>
+      <button class="btn soft" id="dRmPhoto" hidden>移除照片</button>
+    </div>
+    <div class="err" id="dErr"></div>
+    <div class="actions">
+      <button class="btn danger" id="dDel" hidden>刪除</button>
+      <span class="grow"></span>
+      <button class="btn" id="dCancel">取消</button>
+      <button class="btn main" id="dSave">記錄</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
 <!-- 設定與備份 -->
 <div class="scrim" id="setScrim">
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
@@ -512,7 +599,7 @@ const LS = {items:"sd-items", queue:"sd-queue", cfg:"sd-config"};
 let cfg = {url:API_DEFAULT, key:""};
 let queue = [];            // 還沒送到試算表的操作
 let syncState = "idle";    // idle | syncing | offline | auth | error
-let syncing = false, lastSync = 0, syncErr = "";
+let syncing = false, lastSync = 0, syncErr = "", drinkOk = false;
 
 function lsGet(k, d){ try{ const r=localStorage.getItem(k); return r ? JSON.parse(r) : d; }catch(e){ return d; } }
 function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
@@ -547,6 +634,7 @@ async function sync(){
   try{
     while(queue.length){
       const op = queue[0];
+      if(op.op==="save" && op.item.kind==="drink" && !drinkOk){ await api({action:"version"}); drinkOk = true; }  // 舊版 Code.gs 沒有飲料分頁，先確認
       if(op.op==="save" && op.item.photoRef && !op.item.photoId){
         const ref = op.item.photoRef, id = op.item.id, url = await idbGet(ref);
         if(url){
@@ -566,7 +654,7 @@ async function sync(){
     }
     const d = await api({action:"list"});
     const map = new Map();
-    d.notes.concat(d.letters).forEach(x => map.set(x.id, x));
+    d.notes.concat(d.letters, d.drinks || []).forEach(x => map.set(x.id, x));
     queue.forEach(q => { if(q.op==="delete") map.delete(q.id); else map.set(q.item.id, q.item); });
     items = Array.from(map.values());
     lsSet(LS.items, items);
@@ -748,7 +836,7 @@ function openNote(n, opts={}){
   $("noteScrim").classList.add("open");
   setTimeout(()=>$("text").focus(),60);
 }
-function closeSheets(){ discardPick(); document.querySelectorAll(".scrim").forEach(s=>s.classList.remove("open")); }
+function closeSheets(){ discardPick(); discardDPick(); document.querySelectorAll(".scrim").forEach(s=>s.classList.remove("open")); }
 $("cancel").onclick=closeSheets; $("letterCancel").onclick=closeSheets;
 document.querySelectorAll(".scrim").forEach(s => s.addEventListener("click", e => { if(e.target===s) closeSheets(); }));
 document.addEventListener("keydown", e => { if(e.key==="Escape") closeSheets(); });
@@ -1139,11 +1227,172 @@ function switchTab(t){
 document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function render(){
   if(tab==="diary") renderDiary();
+  if(tab==="drink") renderDrink();
   if(tab==="gacha") renderGacha();
   if(tab==="planet") renderPlanet();
   if(tab==="letters") renderLetters();
   if(tab==="report") renderReport();
 }
+
+/* ---------- 飲料 ---------- */
+const DRINKS = [["🧋","珍珠奶茶"],["☕","咖啡"],["🍵","茶"],["🫖","花草茶"],["🥤","汽水"],["🧃","果汁"],["🥛","牛奶"],["💧","水"],
+  ["🍺","啤酒"],["🍷","紅酒"],["🍹","調酒"],["🥃","烈酒"],["🥥","椰子水"],["🍋","檸檬飲"],["🍫","熱可可"],["🧊","冰飲"]];
+const dName = ic => (DRINKS.find(d => d[0]===ic) || [])[1] || "";
+const dTitle = d => d.name || dName(d.icon) || "飲料";
+const drinkColor = ic => { const i = DRINKS.findIndex(d => d[0]===ic); return i >= 0 ? PALETTE[(i*5) % PALETTE.length][0] : "#D8D0C9"; };
+const drinks = () => items.filter(i => i.kind === "drink");
+const drinksOn = date => drinks().filter(d => d.date === date).sort((a,b) => (a.time||"").localeCompare(b.time||"") || (a.created||0)-(b.created||0));
+const nowHM = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const lastEmoji = v => { const parts = (window.Intl && Intl.Segmenter) ? [...new Intl.Segmenter().segment(v)].map(x => x.segment) : [...v]; return parts[parts.length-1]; };
+let dSel = ymd(new Date()), dView = new Date(); dView.setDate(1);
+let dEditing = null, dIcon = "🥤", dPhoto = {changed:false, removed:false, ref:null};
+function discardDPick(){ if(dPhoto.ref) idbDel(dPhoto.ref); dPhoto = {changed:false, removed:false, ref:null}; }
+
+let toastTimer;
+function toast(msg, undo){
+  const t = $("toast"); t.innerHTML = ""; t.append(el("span", null, msg));
+  if(undo){ const b = el("button", "btn", "復原"); b.onclick = () => { undo(); t.hidden = true; }; t.append(b); }
+  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 5000);
+}
+function attachThumb(b, n){
+  if(!photoKey(n)) return;
+  const ph = el("div", "dph", "📷"); b.append(ph);
+  photoGet(n).then(url => { if(url){ const img = el("img", "dthumb"); img.alt = "飲料照片"; img.src = url; ph.replaceWith(img); } });
+}
+function drinkCard(d){
+  const b = el("button", "dcard"); b.style.background = drinkColor(d.icon);
+  b.setAttribute("aria-label", `${d.time || ""} ${dTitle(d)}，點一下編輯`);
+  b.append(el("span", "de", d.icon));
+  const t = el("div", "dt"); t.append(el("strong", null, dTitle(d)), el("small", null, [d.time, d.note].filter(Boolean).join("　"))); b.append(t);
+  attachThumb(b, d);
+  b.onclick = () => openDrink(d);
+  return b;
+}
+function renderDrink(){
+  const y = dView.getFullYear(), m = dView.getMonth(), today = ymd(new Date());
+  $("dMonthLabel").textContent = `${y} 年 ${m+1} 月`;
+  const days = $("dDays"); days.innerHTML = "";
+  const start = new Date(y, m, 1).getDay(), total = new Date(y, m+1, 0).getDate();
+  for(let i=0; i<start; i++) days.append(el("div", "day blank"));
+  for(let d=1; d<=total; d++){
+    const key = `${y}-${pad(m+1)}-${pad(d)}`, list = drinksOn(key);
+    const b = el("button", "day" + (list.length ? " dhas" : "") + (key===today ? " today" : "") + (key===dSel ? " sel" : ""));
+    b.setAttribute("aria-label", `${m+1} 月 ${d} 日，${list.length} 杯`);
+    if(key > today) b.disabled = true;
+    const icons = [...new Set(list.map(x => x.icon))].slice(0, 2).join("");
+    b.append(el("span", "n", d), el("span", "w", icons));
+    b.onclick = () => { dSel = key; renderDrink(); if(innerWidth < 820) $("dQuickTitle").scrollIntoView({behavior:"smooth", block:"start"}); };
+    days.append(b);
+  }
+  const month = drinks().filter(d => d.date.startsWith(`${y}-${pad(m+1)}-`));
+  $("dMonthTitle").textContent = `${m+1} 月：${month.length} 杯，${new Set(month.map(d => d.date)).size} 天有喝`;
+  const bar = $("dBar"), leg = $("dLegend"); bar.innerHTML = ""; leg.innerHTML = "";
+  const cnt = {}; month.forEach(d => cnt[d.icon] = (cnt[d.icon]||0) + 1);
+  Object.entries(cnt).sort((a,b) => b[1]-a[1]).forEach(([ic,c]) => {
+    const s2 = el("span"); s2.style.background = drinkColor(ic); s2.style.width = (c/month.length*100) + "%"; bar.append(s2);
+    leg.append(el("span", null, `${ic} ${c}`));
+  });
+  if(!month.length) leg.append(el("span", null, "這個月還沒有記錄"));
+
+  const dt = parse(dSel), isToday = dSel === today;
+  $("dQuickTitle").textContent = isToday ? "今天喝了什麼？" : `${dt.getMonth()+1} 月 ${dt.getDate()} 日喝了什麼？`;
+  const grid = $("dGrid"); grid.innerHTML = "";
+  DRINKS.forEach(([ic, nm]) => {
+    const b = el("button", "dbtn"); b.type = "button"; b.setAttribute("aria-label", `記錄一杯${nm}`);
+    b.append(el("b", null, ic), el("span", null, nm)); b.onclick = () => quickDrink(ic, nm); grid.append(b);
+  });
+  $("dDayLabel").textContent = `${dt.getMonth()+1} 月 ${dt.getDate()} 日・星期${"日一二三四五六"[dt.getDay()]}`;
+  const list = drinksOn(dSel); $("dDayCount").textContent = list.length ? `${list.length} 杯` : "";
+  const box = $("dList"); box.innerHTML = "";
+  if(!list.length) box.append(el("div", "empty", "這天還沒有記錄。點上面的飲料圖示，或按「拍照記錄」。"));
+  list.forEach(d => box.append(drinkCard(d)));
+}
+async function quickDrink(icon, name){
+  const d = {id:newId("d"), kind:"drink", date:dSel, time:nowHM(), icon, name:"", note:"", created:Date.now()};
+  try{ await persist(d); toast(`已記錄 ${icon} ${name}`, () => removeItem(d.id)); }
+  catch(e){ toast("沒有存成功，請再試一次"); }
+}
+function renderDIcons(){
+  const box = $("dIcons"); box.innerHTML = "";
+  const list = DRINKS.some(d => d[0]===dIcon) ? DRINKS : DRINKS.concat([[dIcon, ""]]);
+  list.forEach(([ic, nm]) => {
+    const b = el("button", null, ic); b.type = "button"; b.setAttribute("aria-label", nm || "自選圖示"); b.setAttribute("aria-pressed", String(ic===dIcon));
+    b.onclick = () => { dIcon = ic; $("dName").placeholder = dName(ic) || "例如：多多綠茶"; renderDIcons(); };
+    box.append(b);
+  });
+  if(document.activeElement !== $("dEmoji")) $("dEmoji").value = dIcon;
+}
+function openDrink(d, opts = {}){
+  dEditing = d ? d.id : null; dIcon = d ? d.icon : "🥤"; discardDPick();
+  $("dTitle").textContent = d ? "編輯這杯飲料" : "記錄一杯飲料";
+  $("dName").value = d ? d.name || "" : ""; $("dName").placeholder = dName(dIcon) || "例如：多多綠茶";
+  $("dNote").value = d ? d.note || "" : "";
+  $("dDate").max = ymd(new Date()); $("dDate").value = d ? d.date : dSel; $("dTime").value = d ? d.time || "" : nowHM();
+  $("dPrev2").hidden = true; $("dPrev2").removeAttribute("src"); $("dRmPhoto").hidden = !(d && photoKey(d));
+  if(d && photoKey(d)) photoGet(d).then(url => { if(url && dEditing===d.id && !dPhoto.changed){ $("dPrev2").src = url; $("dPrev2").hidden = false; } });
+  $("dDel").hidden = !d; $("dSave").textContent = d ? "儲存" : "記錄"; $("dErr").textContent = "";
+  renderDIcons(); $("drinkScrim").classList.add("open");
+  if(opts.pickPhoto) $("dPhoto").click();
+}
+function compressPhoto(f){
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(f);
+    img.onload = () => {
+      const sc = Math.min(1, 1000 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width*sc); c.height = Math.round(img.height*sc);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      let q = .8, d = c.toDataURL("image/jpeg", q);
+      while(d.length > 260000 && q > .35){ q -= .1; d = c.toDataURL("image/jpeg", q); }
+      URL.revokeObjectURL(url); res(d);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("read")); };
+    img.src = url;
+  });
+}
+$("dPhoto").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if(!f) return;
+  try{
+    const d = await compressPhoto(f);
+    if(dPhoto.ref) idbDel(dPhoto.ref);
+    const ref = newId("p"); await idbSet(ref, d);
+    dPhoto = {changed:true, removed:false, ref};
+    $("dPrev2").src = d; $("dPrev2").hidden = false; $("dRmPhoto").hidden = false; $("dErr").textContent = "";
+  }catch(err){ $("dErr").textContent = "這張照片讀不出來，換一張試試。"; }
+};
+$("dRmPhoto").onclick = () => {
+  if(dPhoto.ref) idbDel(dPhoto.ref);
+  dPhoto = {changed:true, removed:true, ref:null};
+  $("dPrev2").hidden = true; $("dPrev2").removeAttribute("src"); $("dRmPhoto").hidden = true;
+};
+$("dEmoji").oninput = e => { const v = e.target.value.trim(); if(!v) return; dIcon = lastEmoji(v); $("dName").placeholder = dName(dIcon) || "例如：多多綠茶"; renderDIcons(); };
+$("dEmoji").onblur = () => { $("dEmoji").value = dIcon; };
+$("dSave").onclick = async () => {
+  const date = $("dDate").value, time = $("dTime").value || nowHM();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ $("dErr").textContent = "請選擇日期。"; return; }
+  if(date > ymd(new Date())){ $("dErr").textContent = "日期不能比今天晚，請重新選擇。"; return; }
+  const prev = dEditing ? items.find(x => x.id === dEditing) : null;
+  const d = {...(prev || {id:newId("d"), kind:"drink", created:Date.now()}), kind:"drink", date, time, icon:dIcon,
+    name:$("dName").value.trim(), note:$("dNote").value.trim(),
+    ...(dPhoto.changed ? {photoId:"", photoRef: dPhoto.removed ? null : dPhoto.ref} : {})};
+  $("dSave").disabled = true;
+  try{
+    await persist(d); dPhoto = {changed:false, removed:false, ref:null}; closeSheets();
+    const nd = parse(date); dSel = date; dView = new Date(nd.getFullYear(), nd.getMonth(), 1); render();
+  }catch(e){ $("dErr").textContent = "沒有存成功，請再按一次。"; }
+  finally{ $("dSave").disabled = false; }
+};
+$("dDel").onclick = async () => {
+  if(!dEditing || !confirm("要刪除這杯飲料的記錄嗎？")) return;
+  try{ await removeItem(dEditing); closeSheets(); }catch(e){ $("dErr").textContent = "沒有刪除成功，請再試一次。"; }
+};
+$("dCancel").onclick = closeSheets;
+$("drinkScrim").addEventListener("click", e => { if(e.target === $("drinkScrim")) closeSheets(); });
+$("dPhotoBtn").onclick = () => openDrink(null, {pickPhoto:true});
+$("dMore").onclick = () => openDrink(null);
+$("dPrev").onclick = () => { dView.setMonth(dView.getMonth()-1); renderDrink(); };
+$("dNext").onclick = () => { dView.setMonth(dView.getMonth()+1); renderDrink(); };
+$("dToday").onclick = () => { const t = new Date(); dView = new Date(t.getFullYear(), t.getMonth(), 1); dSel = ymd(t); renderDrink(); };
 
 /* ---------- 設定與備份 ---------- */
 function openSettings(msg){
