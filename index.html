@@ -158,8 +158,19 @@ textarea.bin{min-height:76px; resize:vertical; font-family:var(--hand)}
 #starLbl{margin-left:8px; color:var(--ink)}
 .hintbox{background:var(--peach); color:var(--note-ink); border-radius:14px; padding:10px 12px; font-size:.85rem; margin-bottom:14px}
 .hintbox small{display:block; opacity:.75; margin-top:4px}
+.bprev[hidden]{display:none}
 .bprev{display:block; max-width:100%; max-height:200px; border-radius:10px; border:4px solid var(--bg); margin-bottom:8px}
 .dim{opacity:.55}
+.bttoggle{display:flex; align-items:center; gap:12px; background:var(--bg); border-radius:16px; padding:12px 14px; margin-bottom:16px; cursor:pointer}
+.bttoggle input{position:absolute; opacity:0; width:1px; height:1px}
+.bttoggle .sw{flex:none; width:46px; height:28px; border-radius:999px; background:var(--line); position:relative; transition:background .2s}
+.bttoggle .sw::after{content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:var(--surface); box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .2s}
+.bttoggle input:checked + .sw{background:var(--accent)}
+.bttoggle input:checked + .sw::after{transform:translateX(18px)}
+.bttoggle input:focus-visible + .sw{outline:3px solid var(--accent); outline-offset:2px}
+.bttoggle .tt{font-size:.98rem}
+.bttoggle .tt small{display:block; color:var(--muted); font-size:.76rem; margin-top:2px}
+#plainSec[hidden],#btSec[hidden]{display:none}
 .dice-stage{text-align:center; padding:22px 0 8px}
 .dice-face{font-size:3.4rem; display:inline-block}
 .dice-face.rolling{animation:diceSpin .45s linear infinite}
@@ -554,34 +565,7 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
   </div>
 </div>
 
-<!-- 飲料表單 -->
-<div class="scrim" id="drinkScrim">
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
-    <h3 id="dTitle">記錄一杯飲料</h3>
-    <div class="dicons" id="dIcons"></div>
-    <div class="row" style="margin-bottom:6px"><label class="emo-field">自選 emoji<input id="dEmoji" aria-label="自選 emoji" autocomplete="off"></label></div>
-    <label class="field">名稱（可不填）<input id="dName" placeholder="例如：多多綠茶"></label>
-    <label class="field">備註<input id="dNote" placeholder="甜度、冰量、店家……"></label>
-    <div class="two">
-      <label class="field">日期<input type="date" id="dDate"></label>
-      <label class="field">時間<input type="time" id="dTime"></label>
-    </div>
-    <div class="paper" style="margin-top:12px; background:var(--bg)"><img id="dPrev2" alt="這杯飲料的照片" hidden></div>
-    <div class="row" style="margin-top:10px">
-      <label class="btn soft" style="display:inline-flex; align-items:center; cursor:pointer">📷 拍照或選照片<input type="file" id="dPhoto" accept="image/*" hidden></label>
-      <button class="btn soft" id="dRmPhoto" hidden>移除照片</button>
-    </div>
-    <div class="err" id="dErr"></div>
-    <div class="actions">
-      <button class="btn danger" id="dDel" hidden>刪除</button>
-      <span class="grow"></span>
-      <button class="btn" id="dCancel">取消</button>
-      <button class="btn main" id="dSave">記錄</button>
-    </div>
-  </div>
-</div>
-
-<!-- 手搖表單 / 擲骰子 -->
+<!-- 飲料表單（一般飲料 / 手搖） / 擲骰子 -->
 <div class="scrim" id="btScrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="btTitle" id="btSheet"></div></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1338,7 +1322,7 @@ function drinkCard(d){
   else t.append(el("strong", null, dTitle(d)), el("small", null, [d.time, d.note].filter(Boolean).join("　")));
   b.append(t);
   attachThumb(b, d);
-  b.onclick = () => d.shop ? openBt(d) : openDrink(d);
+  b.onclick = () => openBt(d);
   return b;
 }
 function renderDrink(){
@@ -1385,28 +1369,6 @@ async function quickDrink(icon, name){
   try{ await persist(d); toast(`已記錄 ${icon} ${name}`, () => removeItem(d.id)); }
   catch(e){ toast("沒有存成功，請再試一次"); }
 }
-function renderDIcons(){
-  const box = $("dIcons"); box.innerHTML = "";
-  const list = DRINKS.some(d => d[0]===dIcon) ? DRINKS : DRINKS.concat([[dIcon, ""]]);
-  list.forEach(([ic, nm]) => {
-    const b = el("button", null, ic); b.type = "button"; b.setAttribute("aria-label", nm || "自選圖示"); b.setAttribute("aria-pressed", String(ic===dIcon));
-    b.onclick = () => { dIcon = ic; $("dName").placeholder = dName(ic) || "例如：多多綠茶"; renderDIcons(); };
-    box.append(b);
-  });
-  if(document.activeElement !== $("dEmoji")) $("dEmoji").value = dIcon;
-}
-function openDrink(d, opts = {}){
-  dEditing = d ? d.id : null; dIcon = d ? d.icon : "🥤"; discardDPick();
-  $("dTitle").textContent = d ? "編輯這杯飲料" : "記錄一杯飲料";
-  $("dName").value = d ? d.name || "" : ""; $("dName").placeholder = dName(dIcon) || "例如：多多綠茶";
-  $("dNote").value = d ? d.note || "" : "";
-  $("dDate").max = ymd(new Date()); $("dDate").value = d ? d.date : dSel; $("dTime").value = d ? d.time || "" : nowHM();
-  $("dPrev2").hidden = true; $("dPrev2").removeAttribute("src"); $("dRmPhoto").hidden = !(d && photoKey(d));
-  if(d && photoKey(d)) photoGet(d).then(url => { if(url && dEditing===d.id && !dPhoto.changed){ $("dPrev2").src = url; $("dPrev2").hidden = false; } });
-  $("dDel").hidden = !d; $("dSave").textContent = d ? "儲存" : "記錄"; $("dErr").textContent = "";
-  renderDIcons(); $("drinkScrim").classList.add("open");
-  if(opts.pickPhoto) $("dPhoto").click();
-}
 function compressPhoto(f){
   return new Promise((res, rej) => {
     const img = new Image(), url = URL.createObjectURL(f);
@@ -1422,46 +1384,8 @@ function compressPhoto(f){
     img.src = url;
   });
 }
-$("dPhoto").onchange = async e => {
-  const f = e.target.files[0]; e.target.value = ""; if(!f) return;
-  try{
-    const d = await compressPhoto(f);
-    if(dPhoto.ref) idbDel(dPhoto.ref);
-    const ref = newId("p"); await idbSet(ref, d);
-    dPhoto = {changed:true, removed:false, ref};
-    $("dPrev2").src = d; $("dPrev2").hidden = false; $("dRmPhoto").hidden = false; $("dErr").textContent = "";
-  }catch(err){ $("dErr").textContent = "這張照片讀不出來，換一張試試。"; }
-};
-$("dRmPhoto").onclick = () => {
-  if(dPhoto.ref) idbDel(dPhoto.ref);
-  dPhoto = {changed:true, removed:true, ref:null};
-  $("dPrev2").hidden = true; $("dPrev2").removeAttribute("src"); $("dRmPhoto").hidden = true;
-};
-$("dEmoji").oninput = e => { const v = e.target.value.trim(); if(!v) return; dIcon = lastEmoji(v); $("dName").placeholder = dName(dIcon) || "例如：多多綠茶"; renderDIcons(); };
-$("dEmoji").onblur = () => { $("dEmoji").value = dIcon; };
-$("dSave").onclick = async () => {
-  const date = $("dDate").value, time = $("dTime").value || nowHM();
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ $("dErr").textContent = "請選擇日期。"; return; }
-  if(date > ymd(new Date())){ $("dErr").textContent = "日期不能比今天晚，請重新選擇。"; return; }
-  const prev = dEditing ? items.find(x => x.id === dEditing) : null;
-  const d = {...(prev || {id:newId("d"), kind:"drink", created:Date.now()}), kind:"drink", date, time, icon:dIcon,
-    name:$("dName").value.trim(), note:$("dNote").value.trim(),
-    ...(dPhoto.changed ? {photoId:"", photoRef: dPhoto.removed ? null : dPhoto.ref} : {})};
-  $("dSave").disabled = true;
-  try{
-    await persist(d); dPhoto = {changed:false, removed:false, ref:null}; closeSheets();
-    const nd = parse(date); dSel = date; dView = new Date(nd.getFullYear(), nd.getMonth(), 1); render();
-  }catch(e){ $("dErr").textContent = "沒有存成功，請再按一次。"; }
-  finally{ $("dSave").disabled = false; }
-};
-$("dDel").onclick = async () => {
-  if(!dEditing || !confirm("要刪除這杯飲料的記錄嗎？")) return;
-  try{ await removeItem(dEditing); closeSheets(); }catch(e){ $("dErr").textContent = "沒有刪除成功，請再試一次。"; }
-};
-$("dCancel").onclick = closeSheets;
-$("drinkScrim").addEventListener("click", e => { if(e.target === $("drinkScrim")) closeSheets(); });
-$("dPhotoBtn").onclick = () => openDrink(null, {pickPhoto:true});
-$("dMore").onclick = () => openDrink(null);
+$("dPhotoBtn").onclick = () => openBt(null, null, {bt:false, pickPhoto:true});
+$("dMore").onclick = () => openBt(null, null, {bt:false});
 $("dPrev").onclick = () => { dView.setMonth(dView.getMonth()-1); renderDrink(); };
 $("dNext").onclick = () => { dView.setMonth(dView.getMonth()+1); renderDrink(); };
 $("dToday").onclick = () => { const t = new Date(); dView = new Date(t.getFullYear(), t.getMonth(), 1); dSel = ymd(t); renderDrink(); };
@@ -1545,27 +1469,37 @@ $("btNew").onclick = () => openBt(null, null);
 $("btDice").onclick = () => openDice();
 
 /* 表單 */
-function openBt(entry, prefill){
+function openBt(entry, prefill, opts = {}){
   closeBt();
-  const b = entry || prefill || {}, drink = entry ? entry.name : (b.drink || "");
-  bf = {id:entry ? entry.id : null, shop:b.shop || "", drink, sugar:b.sugar || "", ice:b.ice || "", stars:entry ? (entry.stars || 0) : 0,
+  const b = entry || prefill || {};
+  const isBt = entry ? !!entry.shop : (opts.bt !== undefined ? opts.bt : true);
+  const drink = entry ? (entry.shop ? entry.name : "") : (b.drink || "");
+  bf = {id:entry ? entry.id : null, bt:isBt, icon:entry ? (entry.icon || "🥤") : (isBt ? "🧋" : "🥤"),
+        shop:b.shop || "", drink, sugar:b.sugar || "", ice:b.ice || "", stars:entry ? (entry.stars || 0) : 0,
         pickShop:!b.shop, pickDrink:!drink, genOpen:false, autofilled:false};
   bf.sugarCustom = !!bf.sugar && !SUGAR.includes(bf.sugar); bf.iceCustom = !!bf.ice && !ICE.includes(bf.ice);
   const sugarHtml = SUGAR.map(s => `<button type="button" class="chip" data-sugar="${s}" aria-pressed="false">${s}${SUGAR_SUB[s] ? `<small>${SUGAR_SUB[s]}</small>` : ""}</button>`).join("") + '<button type="button" class="chip" data-sugarcustom="1" aria-pressed="false">自己寫</button>';
   const iceHtml = ICE.map(s => `<button type="button" class="chip" data-ice="${s}" aria-pressed="false">${s}</button>`).join("") + '<button type="button" class="chip" data-icecustom="1" aria-pressed="false">自己寫</button>';
   const starBtns = [1,2,3,4,5].map(i => `<button type="button" data-star="${i}" aria-label="${i} 顆星">★</button>`).join("");
-  $("btSheet").innerHTML = `<h3 id="btTitle">${entry ? "編輯這杯手搖" : "記一杯手搖"}</h3>
-    <div class="bsec" id="secShop"></div>
-    <div class="bsec" id="secDrink" hidden></div>
-    <div id="secSpec" hidden>
-      <div class="hintbox" id="lastBox" hidden></div>
-      <div class="bsec"><div class="lg">甜度</div><div class="bchips">${sugarHtml}</div><input class="bin" id="bSugar" style="margin-top:8px" placeholder="例如：二分糖、糖少一點" aria-label="自訂甜度" autocomplete="off" hidden></div>
-      <div class="bsec"><div class="lg">冰塊</div><div class="bchips">${iceHtml}</div><input class="bin" id="bIce" style="margin-top:8px" placeholder="例如：去冰但加一點冰粒" aria-label="自訂冰塊" autocomplete="off" hidden></div>
-      <div class="bsec"><div class="lg">給幾顆星<span id="starLbl"></span></div><div class="starpick">${starBtns}</div></div>
-      <div class="bsec"><label class="lg" for="bNote">小筆記（寫給下次的自己）</label><textarea class="bin" id="bNote" placeholder="例如：珍珠很Q，下次加波霸；茶底偏淡，少冰剛好">${esc(entry ? entry.note : "")}</textarea></div>
-      <div class="two bsec"><label class="field" style="margin-top:0">喝的日期<input type="date" id="bDate" value="${esc(entry ? entry.date : dSel)}" max="${ymd(new Date())}"></label><label class="field" style="margin-top:0">時間<input type="time" id="bTime" value="${esc(entry ? entry.time || "" : nowHM())}"></label></div>
-      <div class="bsec"><img id="bPrev" class="bprev" alt="這杯的照片" hidden><div class="row"><label class="btn soft" style="display:inline-flex; align-items:center; cursor:pointer">📷 拍照或選照片<input type="file" id="bPhoto" accept="image/*" hidden></label><button type="button" class="btn soft" id="bRmPhoto" hidden>移除照片</button></div></div>
+  $("btSheet").innerHTML = `<h3 id="btTitle"></h3>
+    <div class="bsec"><div class="lg">選個圖示</div><div class="dicons" id="uIcons"></div>
+      <label class="emo-field">自選 emoji<input id="uEmoji" aria-label="自選 emoji" autocomplete="off"></label></div>
+    <label class="bttoggle"><input type="checkbox" id="uBt" role="switch"><span class="sw" aria-hidden="true"></span>
+      <span class="tt">🧋 加入手搖紀錄<small>記下店家、甜度冰塊和評分，會出現在手搖紀錄和口袋名單</small></span></label>
+    <div id="plainSec" class="bsec"><label class="field" style="margin-top:0">名稱（可不填）<input id="uName" value="${esc(entry && !entry.shop ? entry.name || "" : "")}" autocomplete="off"></label></div>
+    <div id="btSec">
+      <div class="bsec" id="secShop"></div>
+      <div class="bsec" id="secDrink" hidden></div>
+      <div id="secSpec" hidden>
+        <div class="hintbox" id="lastBox" hidden></div>
+        <div class="bsec"><div class="lg">甜度</div><div class="bchips">${sugarHtml}</div><input class="bin" id="bSugar" style="margin-top:8px" placeholder="例如：二分糖、糖少一點" aria-label="自訂甜度" autocomplete="off" hidden></div>
+        <div class="bsec"><div class="lg">冰塊</div><div class="bchips">${iceHtml}</div><input class="bin" id="bIce" style="margin-top:8px" placeholder="例如：去冰但加一點冰粒" aria-label="自訂冰塊" autocomplete="off" hidden></div>
+        <div class="bsec"><div class="lg">給幾顆星<span id="starLbl"></span></div><div class="starpick">${starBtns}</div></div>
+      </div>
     </div>
+    <div class="bsec"><label class="lg" for="bNote" id="noteLbl"></label><textarea class="bin" id="bNote">${esc(entry ? entry.note : "")}</textarea></div>
+    <div class="two bsec"><label class="field" style="margin-top:0">日期<input type="date" id="bDate" value="${esc(entry ? entry.date : dSel)}" max="${ymd(new Date())}"></label><label class="field" style="margin-top:0">時間<input type="time" id="bTime" value="${esc(entry ? entry.time || "" : nowHM())}"></label></div>
+    <div class="bsec"><img id="bPrev" class="bprev" alt="這杯的照片" hidden><div class="row"><label class="btn soft" style="display:inline-flex; align-items:center; cursor:pointer">📷 拍照或選照片<input type="file" id="bPhoto" accept="image/*" hidden></label><button type="button" class="btn soft" id="bRmPhoto" hidden>移除照片</button></div></div>
     <div class="err" id="bErr"></div>
     <div class="actions">${entry ? '<button type="button" class="btn danger" id="bDel">刪除</button>' : ""}<span class="grow"></span><button type="button" class="btn" id="bCancel">取消</button><button type="button" class="btn main" id="bSave">儲存</button></div>`;
   if(entry && photoKey(entry)){
@@ -1573,10 +1507,27 @@ function openBt(entry, prefill){
     photoGet(entry).then(url => { if(url && bf && bf.id === entry.id && !bPhoto.changed){ $("bPrev").src = url; $("bPrev").hidden = false; } });
   }
   $("btScrim").classList.add("open"); $("btSheet").scrollTop = 0;
-  renderBShop(); renderBDrink(); bShow(); bSyncChips(); bRenderLast(); bUpdateSave();
+  renderUIcons(); renderBShop(); renderBDrink(); bShow(); bSyncChips(); bRenderLast(); applyMode();
+  if(opts.pickPhoto) $("bPhoto").click();
+}
+function renderUIcons(){
+  const box = $("uIcons"); if(!box || !bf) return;
+  const list = DRINKS.some(d => d[0] === bf.icon) ? DRINKS : DRINKS.concat([[bf.icon, ""]]);
+  box.innerHTML = list.map(([ic, nm]) => `<button type="button" data-uicon="${esc(ic)}" aria-label="${esc(nm || "自選圖示")}" aria-pressed="${ic === bf.icon}">${esc(ic)}</button>`).join("");
+  if(document.activeElement !== $("uEmoji")) $("uEmoji").value = bf.icon;
+  $("uName").placeholder = dName(bf.icon) || "例如：多多綠茶";
+}
+function applyMode(){
+  if(!bf) return;
+  $("uBt").checked = bf.bt;
+  $("plainSec").hidden = bf.bt; $("btSec").hidden = !bf.bt;
+  $("noteLbl").textContent = bf.bt ? "小筆記（寫給下次的自己）" : "備註";
+  $("bNote").placeholder = bf.bt ? "例如：珍珠很Q，下次加波霸；茶底偏淡，少冰剛好" : "心得、店家、跟誰一起喝……";
+  $("btTitle").textContent = (bf.id ? "編輯這杯" : "記一杯") + (bf.bt ? "手搖" : "飲料");
+  bUpdateSave();
 }
 function bShow(){ if(!bf) return; $("secDrink").hidden = !bf.shop; $("secSpec").hidden = !bf.drink; }
-function bUpdateSave(){ const s = $("bSave"); if(s && bf) s.classList.toggle("dim", !(bf.shop && bf.drink)); }
+function bUpdateSave(){ const s = $("bSave"); if(s && bf) s.classList.toggle("dim", bf.bt && !(bf.shop && bf.drink)); }
 function optChip(attr, name, extra){ return `<button type="button" class="chip" data-${attr}="${esc(name)}">${esc(name)}${extra || ""}</button>`; }
 function useChip(attr, q){ return `<div class="bchips" style="margin-top:10px"><button type="button" class="chip" data-${attr}="${esc(q)}">＋ 使用「${esc(q)}」</button></div>`; }
 function renderBShop(){
@@ -1669,24 +1620,27 @@ function bSyncChips(fromInput){
   const sl = $("starLbl"); if(sl) sl.textContent = bf.stars ? STARTXT[bf.stars] : "";
 }
 async function saveBt(){
-  const sq = $("shopQ"), dq = $("drinkQ");
-  if(!bf.shop && sq && sq.value.trim()){ bf.shop = sq.value.trim(); bf.pickShop = false; }
-  if(!bf.drink && dq && dq.value.trim()){ bf.drink = dq.value.trim(); bf.pickDrink = false; }
-  if(!bf.shop){ $("bErr").textContent = "先選一間店。"; return; }
-  if(!bf.drink){ renderBShop(); renderBDrink(); bShow(); $("bErr").textContent = "再選一下喝了什麼。"; return; }
+  if(bf.bt){
+    const sq = $("shopQ"), dq = $("drinkQ");
+    if(!bf.shop && sq && sq.value.trim()){ bf.shop = sq.value.trim(); bf.pickShop = false; }
+    if(!bf.drink && dq && dq.value.trim()){ bf.drink = dq.value.trim(); bf.pickDrink = false; }
+    if(!bf.shop){ $("bErr").textContent = "先選一間店，或把「加入手搖紀錄」關掉。"; return; }
+    if(!bf.drink){ renderBShop(); renderBDrink(); bShow(); $("bErr").textContent = "再選一下喝了什麼。"; return; }
+  }
   const date = $("bDate").value, time = $("bTime").value || nowHM();
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ $("bErr").textContent = "請選擇日期。"; return; }
   if(date > ymd(new Date())){ $("bErr").textContent = "日期不能比今天晚，請重新選擇。"; return; }
   const prev = bf.id ? items.find(x => x.id === bf.id) : null;
-  const it = {...(prev || {id:newId("d"), kind:"drink", icon:"🧋", created:Date.now()}), kind:"drink", shop:bf.shop, name:bf.drink,
-    sugar:bf.sugar || "", ice:bf.ice || "", stars:bf.stars || 0, note:$("bNote").value.trim(), date, time,
+  const icon = bf.icon || (bf.bt ? "🧋" : "🥤");
+  const it = {...(prev || {id:newId("d"), kind:"drink", created:Date.now()}), kind:"drink", icon, note:$("bNote").value.trim(), date, time,
+    ...(bf.bt ? {shop:bf.shop, name:bf.drink, sugar:bf.sugar || "", ice:bf.ice || "", stars:bf.stars || 0}
+              : {shop:"", name:$("uName").value.trim(), sugar:"", ice:"", stars:0}),
     ...(bPhoto.changed ? {photoId:"", photoRef: bPhoto.removed ? null : bPhoto.ref} : {})};
-  if(!it.icon) it.icon = "🧋";
   $("bSave").disabled = true;
   try{
     await persist(it); bPhoto = {changed:false, removed:false, ref:null}; closeSheets();
     const nd = parse(date); dSel = date; dView = new Date(nd.getFullYear(), nd.getMonth(), 1); render();
-    toast(`已記下 🧋 ${it.shop}・${it.name}`);
+    toast(it.shop ? `已記下 ${icon} ${it.shop}・${it.name}` : `已記錄 ${icon} ${it.name || dName(icon) || "飲料"}`);
   }catch(e){ $("bErr").textContent = "沒有存成功，請再按一次。"; const s = $("bSave"); if(s) s.disabled = false; }
 }
 
@@ -1742,6 +1696,7 @@ $("btSheet").addEventListener("click", ev => {
     return;
   }
   if(!bf) return;
+  if(ds.uicon !== undefined){ bf.icon = ds.uicon; renderUIcons(); return; }
   if(t.id === "bCancel"){ closeSheets(); return; }
   if(t.id === "bSave"){ saveBt(); return; }
   if(t.id === "bDel"){ if(confirm("要刪除這杯手搖的紀錄嗎？")){ const id = bf.id; closeSheets(); removeItem(id); toast("已刪除"); } return; }
@@ -1763,13 +1718,22 @@ $("btSheet").addEventListener("input", ev => {
   if(id === "drinkQ") renderBDrinkOpts();
   if(id === "bSugar"){ bf.sugar = ev.target.value.trim(); bSyncChips(true); }
   if(id === "bIce"){ bf.ice = ev.target.value.trim(); bSyncChips(true); }
+  if(id === "uEmoji"){ const v = ev.target.value.trim(); if(v){ bf.icon = lastEmoji(v); renderUIcons(); } }
 });
+$("btSheet").addEventListener("focusout", ev => { if(ev.target.id === "uEmoji" && bf) ev.target.value = bf.icon; });
 $("btSheet").addEventListener("keydown", ev => {
   if(ev.key !== "Enter" || !bf) return;
   if(ev.target.id === "shopQ"){ ev.preventDefault(); pickShop(ev.target.value); }
   else if(ev.target.id === "drinkQ"){ ev.preventDefault(); pickDrinkB(ev.target.value); }
 });
 $("btSheet").addEventListener("change", async ev => {
+  if(ev.target.id === "uBt" && bf){
+    const on = ev.target.checked, nm = $("uName").value.trim(); bf.bt = on; $("bErr").textContent = "";
+    if(on){ if(bf.icon === "🥤") bf.icon = "🧋"; if(!bf.drink && nm){ bf.drink = nm; bf.pickDrink = false; } }
+    else if(!nm && bf.drink) $("uName").value = bf.drink;
+    renderUIcons(); renderBShop(); renderBDrink(); bShow(); bSyncChips(); bRenderLast(); applyMode();
+    return;
+  }
   if(ev.target.id !== "bPhoto" || !bf) return;
   const f = ev.target.files[0]; ev.target.value = ""; if(!f) return;
   try{
