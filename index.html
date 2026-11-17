@@ -111,8 +111,8 @@ h2{font-size:1.15rem; font-weight:400; margin:0 0 10px}
 .toast[hidden]{display:none}
 .toast .btn{min-height:30px; padding:2px 12px; background:var(--surface); color:var(--ink); border-color:transparent}
 .drinkwrap{display:flex; flex-direction:column}
-.drinkwrap > .side{order:2; margin-top:16px}
-@media (min-width:820px){ .drinkwrap{display:grid; grid-template-columns:350px 1fr; gap:28px; align-items:start} .drinkwrap > .side{order:0; margin-top:0; position:sticky; top:calc(14px + env(safe-area-inset-top,0px))} }
+.drinkwrap > .side{margin-bottom:16px}
+@media (min-width:820px){ .drinkwrap{display:grid; grid-template-columns:350px 1fr; gap:28px; align-items:start} .drinkwrap > .side{margin-bottom:0; position:sticky; top:calc(14px + env(safe-area-inset-top,0px))} }
 .seg{display:grid; grid-template-columns:repeat(3,1fr); background:var(--surface); border:2px solid var(--line); border-radius:999px; padding:4px; margin-bottom:12px}
 .seg button{border:0; background:none; border-radius:999px; padding:7px 0; cursor:pointer; font-size:.9rem; color:var(--muted)}
 .seg button[aria-selected="true"]{background:var(--ink); color:var(--surface)}
@@ -435,12 +435,6 @@ textarea::placeholder{color:rgba(0,0,0,.42)}
         </div>
       </div>
       <div>
-        <div class="card">
-          <h2 id="dQuickTitle"></h2>
-          <p class="muted quickhint" style="font-size:.8rem">點一下圖示就記錄一杯；想拍照或補充說明，按下面的按鈕。</p>
-          <div class="dgrid" id="dGrid"></div>
-          <div class="row" style="margin-top:12px"><button class="btn main grow" id="dPhotoBtn">📷 拍照記錄</button><button class="btn" id="dMore">✏️ 詳細記錄</button></div>
-        </div>
         <div class="daytitle"><h2 id="dDayLabel"></h2><small class="muted" id="dDayCount"></small></div>
         <div id="dList"></div>
       </div>
@@ -692,7 +686,7 @@ async function sync(){
   try{
     while(queue.length){
       const op = queue[0];
-      if(op.op==="save" && op.item.kind==="drink" && !drinkOk){ await api({action:"version"}); drinkOk = true; }  // 舊版 Code.gs 沒有飲料分頁，先確認
+      if(op.op==="save" && op.item.kind==="drink" && !drinkOk){ const r = await api({action:"version"}); if(!(r.v >= 5)){ const e = new Error("未知的動作"); e.server = true; throw e; } drinkOk = true; }  // 舊版 Code.gs 沒有飲料分頁，先確認
       if(op.op==="save" && op.item.photoRef && !op.item.photoId){
         const ref = op.item.photoRef, id = op.item.id, url = await idbGet(ref);
         if(url){
@@ -1299,7 +1293,7 @@ const dName = ic => (DRINKS.find(d => d[0]===ic) || [])[1] || "";
 const dTitle = d => d.name || dName(d.icon) || "飲料";
 const drinkColor = ic => { const i = DRINKS.findIndex(d => d[0]===ic); return i >= 0 ? PALETTE[(i*5) % PALETTE.length][0] : "#D8D0C9"; };
 const drinks = () => items.filter(i => i.kind === "drink");
-const drinksOn = date => drinks().filter(d => d.date === date).sort((a,b) => (a.time||"").localeCompare(b.time||"") || (a.created||0)-(b.created||0));
+const drinksOn = date => drinks().filter(d => d.oncal !== false && d.date === date).sort((a,b) => (a.time||"").localeCompare(b.time||"") || (a.created||0)-(b.created||0));
 const nowHM = () => { const n = new Date(); return `${pad(n.getHours())}:${pad(n.getMinutes())}`; };
 const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const lastEmoji = v => { const parts = (window.Intl && Intl.Segmenter) ? [...new Intl.Segmenter().segment(v)].map(x => x.segment) : [...v]; return parts[parts.length-1]; };
@@ -1343,10 +1337,10 @@ function renderDrink(){
     if(key > today) b.disabled = true;
     const icons = [...new Set(list.map(x => x.icon))].slice(0, 2).join("");
     b.append(el("span", "n", d), el("span", "w", icons));
-    b.onclick = () => { dSel = key; renderDrink(); if(innerWidth < 820) $("dQuickTitle").scrollIntoView({behavior:"smooth", block:"start"}); };
+    b.onclick = () => { dSel = key; renderDrink(); if(innerWidth < 820) $("dDayLabel").scrollIntoView({behavior:"smooth", block:"start"}); };
     days.append(b);
   }
-  const month = drinks().filter(d => d.date.startsWith(`${y}-${pad(m+1)}-`));
+  const month = drinks().filter(d => d.oncal !== false && (d.date || "").startsWith(`${y}-${pad(m+1)}-`));
   $("dMonthTitle").textContent = `${m+1} 月：${month.length} 杯，${new Set(month.map(d => d.date)).size} 天有喝`;
   const bar = $("dBar"), leg = $("dLegend"); bar.innerHTML = ""; leg.innerHTML = "";
   const cnt = {}; month.forEach(d => cnt[d.icon] = (cnt[d.icon]||0) + 1);
@@ -1356,17 +1350,11 @@ function renderDrink(){
   });
   if(!month.length) leg.append(el("span", null, "這個月還沒有記錄"));
 
-  const dt = parse(dSel), isToday = dSel === today;
-  $("dQuickTitle").textContent = isToday ? "今天喝了什麼？" : `${dt.getMonth()+1} 月 ${dt.getDate()} 日喝了什麼？`;
-  const grid = $("dGrid"); grid.innerHTML = "";
-  DRINKS.forEach(([ic, nm]) => {
-    const b = el("button", "dbtn"); b.type = "button"; b.setAttribute("aria-label", `記錄一杯${nm}`);
-    b.append(el("b", null, ic), el("span", null, nm)); b.onclick = () => quickDrink(ic, nm); grid.append(b);
-  });
+  const dt = parse(dSel);
   $("dDayLabel").textContent = `${dt.getMonth()+1} 月 ${dt.getDate()} 日・星期${"日一二三四五六"[dt.getDay()]}`;
   const list = drinksOn(dSel); $("dDayCount").textContent = list.length ? `${list.length} 杯` : "";
   const box = $("dList"); box.innerHTML = "";
-  if(!list.length) box.append(el("div", "empty", "這天還沒有記錄。點上面的飲料圖示，或按「拍照記錄」。"));
+  if(!list.length) box.append(el("div", "empty", "這天還沒有記錄。按上面的「🧋 記一杯手搖」新增；想記一般飲料，把「加入手搖紀錄」關掉就好。"));
   list.forEach(d => box.append(drinkCard(d)));
 }
 async function quickDrink(icon, name){
@@ -1389,24 +1377,23 @@ function compressPhoto(f){
     img.src = url;
   });
 }
-$("dPhotoBtn").onclick = () => openBt(null, null, {bt:false, pickPhoto:true});
-$("dMore").onclick = () => openBt(null, null, {bt:false});
 $("dPrev").onclick = () => { dView.setMonth(dView.getMonth()-1); renderDrink(); };
 $("dNext").onclick = () => { dView.setMonth(dView.getMonth()+1); renderDrink(); };
 $("dToday").onclick = () => { const t = new Date(); dView = new Date(t.getFullYear(), t.getMonth(), 1); dSel = ymd(t); renderDrink(); };
 
 /* ---------- 手搖紀錄 ---------- */
-const BT_SHOPS = ["50嵐", "清心福全", "八曜和茶", "季緣", "穩飲茶府", "花火禾茶", "金茶伍", "茶之魔手", "一沐日", "迷客夏", "CoCo都可", "得正", "可不可熟成紅茶", "麻古茶坊", "珍煮丹", "大苑子", "龜記", "五桐號", "烏弄", "春水堂", "茶湯會", "鶴茶樓", "老賴茶棧", "約翰紅茶", "先喝道", "再睡5分鐘", "水巷茶弄", "圓石禪茶", "UG樂己", "日出茶太", "清玉", "丘森茶室", "萬波島嶼紅茶", "COMEBUY", "喫茶小舖", "波哥", "布萊恩紅茶", "小宇宙", "吉龍", "綠恩"];
-const BT_MENU = {"50嵐": ["波霸奶茶", "波霸紅茶拿鐵", "四季春青茶", "冰淇淋紅茶", "珍波椰青茶", "重焙烏龍拿鐵", "芒果青", "荔枝烏龍", "椰果烏龍奶", "黃金烏龍", "麵茶紅茶拿鐵", "四季奶青瑪奇朵", "阿華田", "阿薩姆紅茶", "烏龍綠茶", "養樂多綠茶"], "清心福全": ["綠茶", "紅茶", "綠+紅（隱藏喝法）", "烏龍綠茶", "梅子綠茶", "蜜貝綠茶", "冬瓜檬檬", "檬檬愛玉", "波霸奶茶", "珍珠奶茶"], "迷客夏": ["珍珠大正紅茶拿鐵", "大正紅茶拿鐵", "娜杯紅茶拿鐵", "英倫伯爵紅茶", "蜜桃烏龍", "輕纖蕎麥茶", "手炒黑糖鮮奶", "原片初露青茶", "柳丁綠茶", "琥珀高峰烏龍", "芋頭鮮奶", "青檬香茶"], "可不可熟成紅茶": ["熟成紅茶", "熟成歐蕾", "白玉歐蕾", "春芽綠茶", "春芽冷露", "荔麗紅茶", "雪藏紅茶"], "CoCo都可": ["珍珠奶茶", "奶茶三兄弟", "百香雙響炮"], "珍煮丹": ["黑糖珍珠鮮奶", "珍珠奶茶", "珍珠紅茶拿鐵"], "麻古茶坊": ["芝芝葡萄果粒", "葡萄果粒波波", "芝芝柳橙", "翡翠柳橙", "柚香翡翠", "楊枝甘露 2.0", "芝芝芒果果粒", "芒果果粒波波", "香橙果粒茶", "紅萱烏龍", "橙香紅萱", "金萱雙Q", "高山金萱茶", "蕎麥綠寶石", "波霸紅茶拿鐵", "蜜桃紅茶"], "季緣": ["水蜜桃青烏龍", "富士蘋果青烏龍", "芭樂青梅烏龍凍", "金鑽青韻茶王", "蓮霧青韻茶王", "山茶花蜜桃奶蓋", "杉林溪青韻茶王", "凍頂烏龍茶", "金萱鮮奶茶", "阿薩姆生乳", "貴妃烏龍厚奶", "黑糖珍珠鮮奶", "玫瑰冬片"], "八曜和茶": ["柚香覺醒307", "茉妃50505", "舞伎406紅茶", "大地覺醒紅茶", "83蜜檬爽爽", "樂多307", "和風308", "八曜和風", "牧場308", "炙燒濃乳308", "京彩舞伎奶茶", "茉心極韻白奶茶", "8YO極韻白奶茶", "406極韻白奶茶", "307極韻白奶茶", "504極韻白奶茶", "308極韻白奶茶", "順解ㄦㄦ柚香菌乳茶"], "一沐日": ["蕎麥茶", "蕎麥茶+粉翰", "黃金蕎麥奶茶", "黃金蕎麥拿鐵", "蕎麥鮮奶茶", "粉翰黑糖奶茶", "高讚塔烏龍綠", "糯米香茶", "島韻紅茶", "逮丸奶茶", "荔枝烏龍", "粉翰桂花檬檬", "奶蓋蕎麥茶", "柚子烏龍", "奶蓋招牌紅"], "得正": ["輕烏龍", "春烏龍", "焙烏龍", "雙柚金烏龍", "甘蔗春烏龍", "檬檬春烏龍", "香橙春烏龍", "青梅春烏龍", "輕烏龍鮮奶", "焙烏龍鮮奶", "烘吉鮮奶", "黃金珍珠奶綠", "芝士奶蓋春烏龍", "芝士奶蓋焙烏龍", "芝士奶蓋阿華田", "緋烏龍"], "穩飲茶府": ["獅潭柑橘紅茶"], "金茶伍": ["兩顆紅蘋"], "龜記": ["玉荷包茶王"], "春水堂": ["珍珠奶茶"]};
+const BT_SHOPS = ["50嵐", "清心福全", "八曜和茶", "大茗", "青山", "季緣", "金茶伍", "一沐日", "迷客夏", "CoCo都可", "得正", "可不可熟成紅茶", "麻古茶坊", "珍煮丹", "大苑子", "龜記", "五桐號", "烏弄", "春水堂", "茶湯會", "鶴茶樓", "老賴茶棧", "約翰紅茶", "先喝道", "再睡5分鐘", "水巷茶弄", "圓石禪茶", "UG樂己", "日出茶太", "清玉", "萬波島嶼紅茶", "COMEBUY", "喫茶小舖", "波哥", "布萊恩紅茶", "吉龍"];
+const BT_MENU = {"50嵐": ["波霸奶茶", "波霸紅茶拿鐵", "四季春青茶", "冰淇淋紅茶", "珍波椰青茶", "重焙烏龍拿鐵", "芒果青", "荔枝烏龍", "椰果烏龍奶", "黃金烏龍", "麵茶紅茶拿鐵", "四季奶青瑪奇朵", "阿華田", "阿薩姆紅茶", "烏龍綠茶", "養樂多綠茶"], "清心福全": ["綠茶", "紅茶", "綠+紅（隱藏喝法）", "烏龍綠茶", "梅子綠茶", "蜜貝綠茶", "冬瓜檬檬", "檬檬愛玉", "波霸奶茶", "珍珠奶茶"], "迷客夏": ["珍珠大正紅茶拿鐵", "大正紅茶拿鐵", "娜杯紅茶拿鐵", "英倫伯爵紅茶", "蜜桃烏龍", "輕纖蕎麥茶", "手炒黑糖鮮奶", "原片初露青茶", "柳丁綠茶", "琥珀高峰烏龍", "芋頭鮮奶", "青檬香茶"], "可不可熟成紅茶": ["熟成紅茶", "熟成歐蕾", "白玉歐蕾", "春芽綠茶", "春芽冷露", "荔麗紅茶", "雪藏紅茶"], "CoCo都可": ["珍珠奶茶", "奶茶三兄弟", "百香雙響炮"], "珍煮丹": ["黑糖珍珠鮮奶", "珍珠奶茶", "珍珠紅茶拿鐵"], "麻古茶坊": ["芝芝葡萄果粒", "葡萄果粒波波", "芝芝柳橙", "翡翠柳橙", "柚香翡翠", "楊枝甘露 2.0", "芝芝芒果果粒", "芒果果粒波波", "香橙果粒茶", "紅萱烏龍", "橙香紅萱", "金萱雙Q", "高山金萱茶", "蕎麥綠寶石", "波霸紅茶拿鐵", "蜜桃紅茶"], "季緣": ["水蜜桃青烏龍", "富士蘋果青烏龍", "芭樂青梅烏龍凍", "金鑽青韻茶王", "蓮霧青韻茶王", "山茶花蜜桃奶蓋", "杉林溪青韻茶王", "凍頂烏龍茶", "金萱鮮奶茶", "阿薩姆生乳", "貴妃烏龍厚奶", "黑糖珍珠鮮奶", "玫瑰冬片"], "八曜和茶": ["柚香覺醒307", "茉妃50505", "舞伎406紅茶", "大地覺醒紅茶", "83蜜檬爽爽", "樂多307", "和風308", "八曜和風", "牧場308", "炙燒濃乳308", "京彩舞伎奶茶", "茉心極韻白奶茶", "8YO極韻白奶茶", "406極韻白奶茶", "307極韻白奶茶", "504極韻白奶茶", "308極韻白奶茶", "順解ㄦㄦ柚香菌乳茶"], "一沐日": ["蕎麥茶", "蕎麥茶+粉翰", "黃金蕎麥奶茶", "黃金蕎麥拿鐵", "蕎麥鮮奶茶", "粉翰黑糖奶茶", "高讚塔烏龍綠", "糯米香茶", "島韻紅茶", "逮丸奶茶", "荔枝烏龍", "粉翰桂花檬檬", "奶蓋蕎麥茶", "柚子烏龍", "奶蓋招牌紅"], "得正": ["輕烏龍", "春烏龍", "焙烏龍", "雙柚金烏龍", "甘蔗春烏龍", "檬檬春烏龍", "香橙春烏龍", "青梅春烏龍", "輕烏龍鮮奶", "焙烏龍鮮奶", "烘吉鮮奶", "黃金珍珠奶綠", "芝士奶蓋春烏龍", "芝士奶蓋焙烏龍", "芝士奶蓋阿華田", "緋烏龍"], "金茶伍": ["兩顆紅蘋"], "龜記": ["玉荷包茶王"], "春水堂": ["珍珠奶茶"], "大茗": ["玉露青茶", "桂花青茶", "炭燒青茶", "翡翠綠茶", "紅玉紅茶", "御品冬瓜露", "熟成油切蕎麥", "冰滴烏龍茶", "冰滴半熟金萱", "紅茶拿鐵", "翡翠拿鐵", "鐵觀音拿鐵", "鮮草嫩奶", "酪梨奶蓋紅玉", "酪梨奶蓋綠茶", "酪梨奶蓋烏龍", "酪梨奶蓋冬瓜露", "玉露奶青", "桂花奶青", "懷舊經典奶茶", "翡翠奶綠", "鐵觀音奶茶", "熟成蕎麥奶茶", "珍珠奶茶", "烤糖蕎麥凍奶青", "蘋果玉露青", "老奶奶的鳳梨田", "甘蔗玉露青", "冬瓜玉露青", "鮮檸冬瓜露", "翡翠多多青", "檸檬桂花青", "百香翡翠青", "柳橙翡翠青"], "青山": ["春青", "夏青", "秋青", "冬青", "綠水", "天蟬紅茶", "青山綠水", "春青菊花", "菊花冬露", "蕎麥冬露", "春青冬露", "多多綠水", "東方菊花茶", "西穀蕎麥茶", "南非國寶茶", "北風桂花玄米茶", "山峰奶茶", "天蟬那堤", "夏青那堤", "蕎麥那堤", "天蟬燕麥奶", "夏青燕麥奶", "蕎麥燕麥奶", "菜燕春青", "杏仁凍春青", "菜燕奶茶", "青茶婚貴奶茶", "琥珀珍珠奶茶", "蕎麥珍珠奶茶", "青茶凍天蟬那堤", "琥珀珍珠天蟬那堤", "蕎麥珍珠夏青那堤", "蕎麥奶蓋綠水", "海鹽奶蓋春青", "海鹽奶蓋紅茶", "蕎麥奶蓋玄米茶", "奶蓋輕蘋香茶", "白甘蔗春青", "香檸綠水", "柳丁綠水", "紅柚綠水", "橘子春青", "荔枝春青", "水梨春青", "輕蘋香茶", "水蜜桃夏青", "香鳶尾青茶"]};
 const BT_GENERIC = ["珍珠奶茶", "波霸奶茶", "紅茶", "綠茶", "烏龍茶", "青茶", "奶茶", "鮮奶茶", "紅茶拿鐵", "烏龍拿鐵", "茉莉綠茶", "四季春茶", "檬檬綠茶", "柳丁綠茶", "蜜貝綠茶", "梅子綠茶", "百香綠茶", "芒果青茶", "黑糖鮮奶", "芋頭鮮奶", "冬瓜茶", "冬瓜檬檬", "檬檬愛玉", "多多綠茶", "仙草茶", "豆漿紅茶"];
-const SUGAR = ["無糖","微糖","半糖","少糖","全糖"], SUGAR_SUB = {"微糖":"三分","半糖":"五分","少糖":"七分"};
-const ICE = ["去冰","微冰","少冰","正常冰","熱飲"];
+const SUGAR = ["無糖","一分糖","微糖","半糖","少糖","全糖","甜度固定"], SUGAR_SUB = {"微糖":"三分","半糖":"五分","少糖":"七分"};
+const ICE = ["完全去冰","去冰","微冰","少冰","正常冰","冰塊固定","熱飲"];
 const STARTXT = ["還沒評分","雷，不會再點","普通","還可以","好喝","超愛，一定回購"];
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const norm = s => String(s || "").trim().toLowerCase();
-const fmtMD = s => { const p = (s || "").split("-"); return p.length === 3 ? (+p[1]) + "/" + (+p[2]) : ""; };
+const fmtMD = s => { const p = (s || "").split("-"); if(p.length !== 3) return ""; const md = (+p[1]) + "/" + (+p[2]); return +p[0] === new Date().getFullYear() ? md : p[0] + "/" + md; };
 const bts = () => drinks().filter(d => d.shop);
-const btSorted = () => bts().sort((a,b) => (b.date||"").localeCompare(a.date||"") || (b.time||"").localeCompare(a.time||"") || (b.created||0) - (a.created||0));
+const btKey = e => e.date || (e.created ? ymd(new Date(e.created)) : "");
+const btSorted = () => bts().sort((a,b) => btKey(b).localeCompare(btKey(a)) || (b.time||"").localeCompare(a.time||"") || (b.created||0) - (a.created||0));
 function shopsByUse(){ const seen = new Set(), out = []; btSorted().forEach(e => { if(!seen.has(e.shop)){ seen.add(e.shop); out.push(e.shop); } }); return out; }
 function findLast(shop, drink, skipId){ const s = norm(shop), d = norm(drink); if(!s || !d) return null; return btSorted().find(e => e.id !== skipId && norm(e.shop) === s && norm(e.name) === d) || null; }
 function drinksAt(shop){
@@ -1436,7 +1423,7 @@ function renderBtLog(){
   const list = btSorted().filter(e => btFilter === "all" || e.shop === btFilter);
   if(!list.length){ $("btList").innerHTML = '<div class="empty">還沒有手搖紀錄。按上面的「🧋 記一杯手搖」，記下店家、甜度冰塊和給幾顆星。</div>'; return; }
   $("btList").innerHTML = list.map(e => `<article class="slip" data-id="${esc(e.id)}">
-    <div class="slip-top"><span class="shopt">${esc(e.shop)}</span><span>${esc(fmtMD(e.date))}</span></div>
+    <div class="slip-top"><span class="shopt">${esc(e.shop)}</span><span>${e.date ? esc(fmtMD(e.date)) : "沒有日期"}${e.oncal === false ? "・不在月曆" : ""}</span></div>
     <div class="slip-body"><div class="slip-main"><div class="drk">${esc(e.name)}</div>${e.stars ? starHtml(e.stars) : '<div class="muted" style="font-size:.8rem">尚未評分</div>'}</div>
       <div class="stamps"><div class="stamp">${esc(e.sugar || "－")}</div><div class="stamp ice">${esc(e.ice || "－")}</div></div></div>
     ${e.note ? `<p class="bnote"><b>下次參考：</b>${esc(e.note)}</p>` : ""}
@@ -1479,7 +1466,7 @@ function openBt(entry, prefill, opts = {}){
   const b = entry || prefill || {};
   const isBt = entry ? !!entry.shop : (opts.bt !== undefined ? opts.bt : true);
   const drink = entry ? (entry.shop ? entry.name : "") : (b.drink || "");
-  bf = {id:entry ? entry.id : null, bt:isBt, icon:entry ? (entry.icon || "🥤") : (isBt ? "🧋" : "🥤"),
+  bf = {id:entry ? entry.id : null, bt:isBt, cal:entry ? (entry.oncal !== false && !!entry.date) : (opts.cal !== undefined ? opts.cal : dv === "day"), icon:entry ? (entry.icon || "🥤") : (isBt ? "🧋" : "🥤"),
         shop:b.shop || "", drink, sugar:b.sugar || "", ice:b.ice || "", stars:entry ? (entry.stars || 0) : 0,
         pickShop:!b.shop, pickDrink:!drink, genOpen:false, autofilled:false};
   bf.sugarCustom = !!bf.sugar && !SUGAR.includes(bf.sugar); bf.iceCustom = !!bf.ice && !ICE.includes(bf.ice);
@@ -1501,7 +1488,9 @@ function openBt(entry, prefill, opts = {}){
       <section class="fcard"><h4 class="fhead">⭐ 給幾顆星<span id="starLbl"></span></h4><div class="starpick">${starBtns}</div></section>
     </div>
     <div class="bsec"><label class="lg" for="bNote" id="noteLbl"></label><textarea class="bin" id="bNote">${esc(entry ? entry.note : "")}</textarea></div>
-    <div class="two bsec"><label class="field" style="margin-top:0">日期<input type="date" id="bDate" value="${esc(entry ? entry.date : dSel)}" max="${ymd(new Date())}"></label><label class="field" style="margin-top:0">時間<input type="time" id="bTime" value="${esc(entry ? entry.time || "" : nowHM())}"></label></div>
+    <label class="bttoggle"><input type="checkbox" id="uCal" role="switch"><span class="sw" aria-hidden="true"></span>
+      <span class="tt">📅 記到月曆<small>關掉就不會出現在每日紀錄和月曆，適合記別人喝的、或很久以前喝的</small></span></label>
+    <div class="two bsec"><label class="field" style="margin-top:0"><span id="dateLbl">日期</span><input type="date" id="bDate" value="${esc(entry ? entry.date || "" : (bf.cal ? dSel : ""))}" max="${ymd(new Date())}"></label><label class="field" style="margin-top:0" id="timeWrap">時間（可不填）<input type="time" id="bTime" value="${esc(entry ? entry.time || "" : (bf.cal ? nowHM() : ""))}"></label></div>
     <div class="bsec"><img id="bPrev" class="bprev" alt="這杯的照片" hidden><div class="row"><label class="btn soft" style="display:inline-flex; align-items:center; cursor:pointer">📷 拍照或選照片<input type="file" id="bPhoto" accept="image/*" hidden></label><button type="button" class="btn soft" id="bRmPhoto" hidden>移除照片</button></div></div>
     <div class="err" id="bErr"></div>
     <div class="actions">${entry ? '<button type="button" class="btn danger" id="bDel">刪除</button>' : ""}<span class="grow"></span><button type="button" class="btn" id="bCancel">取消</button><button type="button" class="btn main" id="bSave">儲存</button></div>`;
@@ -1510,7 +1499,7 @@ function openBt(entry, prefill, opts = {}){
     photoGet(entry).then(url => { if(url && bf && bf.id === entry.id && !bPhoto.changed){ $("bPrev").src = url; $("bPrev").hidden = false; } });
   }
   $("btScrim").classList.add("open"); $("btSheet").scrollTop = 0;
-  renderUIcons(); renderBShop(); renderBDrink(); bShow(); bSyncChips(); bRenderLast(); applyMode();
+  renderUIcons(); renderBShop(); renderBDrink(); bShow(); bSyncChips(); bRenderLast(); applyMode(); applyCal();
   if(opts.pickPhoto) $("bPhoto").click();
 }
 function renderUIcons(){
@@ -1519,6 +1508,12 @@ function renderUIcons(){
   box.innerHTML = list.map(([ic, nm]) => `<button type="button" data-uicon="${esc(ic)}" aria-label="${esc(nm || "自選圖示")}" aria-pressed="${ic === bf.icon}">${esc(ic)}</button>`).join("");
   if(document.activeElement !== $("uEmoji")) $("uEmoji").value = bf.icon;
   $("uName").placeholder = dName(bf.icon) || "例如：多多綠茶";
+}
+function applyCal(){
+  if(!bf) return;
+  $("uCal").checked = bf.cal;
+  $("dateLbl").textContent = bf.cal ? "日期" : "日期（可不填）";
+  $("timeWrap").hidden = !bf.cal;
 }
 function applyMode(){
   if(!bf) return;
@@ -1605,7 +1600,7 @@ function bRenderLast(){
   const last = findLast(bf.shop, bf.drink, bf.id);
   if(!bf.drink || !last){ box.hidden = true; box.innerHTML = ""; return; }
   box.hidden = false;
-  box.innerHTML = `<b>上次（${esc(fmtMD(last.date))}）</b>：${esc(last.sugar || "－")}、${esc(last.ice || "－")}${last.stars ? "，" + last.stars + " 顆星" : ""}` +
+  box.innerHTML = `<b>上次${last.date ? "（" + esc(fmtMD(last.date)) + "）" : ""}</b>：${esc(last.sugar || "－")}、${esc(last.ice || "－")}${last.stars ? "，" + last.stars + " 顆星" : ""}` +
     (last.note ? `<small>${esc(last.note)}</small>` : "") + (bf.autofilled ? "<small>已幫你帶入上次的甜度和冰塊，可以直接修改</small>" : "");
 }
 function bSyncChips(fromInput){
@@ -1629,19 +1624,20 @@ async function saveBt(){
     if(!bf.shop){ $("bErr").textContent = "先選一間店，或把「加入手搖紀錄」關掉。"; return; }
     if(!bf.drink){ renderBShop(); renderBDrink(); bShow(); $("bErr").textContent = "再選一下喝了什麼。"; return; }
   }
-  const date = $("bDate").value, time = $("bTime").value || nowHM();
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ $("bErr").textContent = "請選擇日期。"; return; }
-  if(date > ymd(new Date())){ $("bErr").textContent = "日期不能比今天晚，請重新選擇。"; return; }
+  const date = $("bDate").value || "", time = bf.cal ? $("bTime").value || "" : "";
+  if(bf.cal && !/^\d{4}-\d{2}-\d{2}$/.test(date)){ $("bErr").textContent = "記到月曆需要日期；不想記到月曆，可以把「記到月曆」關掉。"; return; }
+  if(date && date > ymd(new Date())){ $("bErr").textContent = "日期不能比今天晚，請重新選擇。"; return; }
   const prev = bf.id ? items.find(x => x.id === bf.id) : null;
   const icon = bf.icon || (bf.bt ? "🧋" : "🥤");
-  const it = {...(prev || {id:newId("d"), kind:"drink", created:Date.now()}), kind:"drink", icon, note:$("bNote").value.trim(), date, time,
+  const it = {...(prev || {id:newId("d"), kind:"drink", created:Date.now()}), kind:"drink", icon, note:$("bNote").value.trim(), date, time, oncal:bf.cal,
     ...(bf.bt ? {shop:bf.shop, name:bf.drink, sugar:bf.sugar || "", ice:bf.ice || "", stars:bf.stars || 0}
               : {shop:"", name:$("uName").value.trim(), sugar:"", ice:"", stars:0}),
     ...(bPhoto.changed ? {photoId:"", photoRef: bPhoto.removed ? null : bPhoto.ref} : {})};
   $("bSave").disabled = true;
   try{
     await persist(it); bPhoto = {changed:false, removed:false, ref:null}; closeSheets();
-    const nd = parse(date); dSel = date; dView = new Date(nd.getFullYear(), nd.getMonth(), 1); render();
+    if(it.oncal){ const nd = parse(date); dSel = date; dView = new Date(nd.getFullYear(), nd.getMonth(), 1); }
+    render();
     toast(it.shop ? `已記下 ${icon} ${it.shop}・${it.name}` : `已記錄 ${icon} ${it.name || dName(icon) || "飲料"}`);
   }catch(e){ $("bErr").textContent = "沒有存成功，請再按一次。"; const s = $("bSave"); if(s) s.disabled = false; }
 }
@@ -1729,6 +1725,11 @@ $("btSheet").addEventListener("keydown", ev => {
   else if(ev.target.id === "drinkQ"){ ev.preventDefault(); pickDrinkB(ev.target.value); }
 });
 $("btSheet").addEventListener("change", async ev => {
+  if(ev.target.id === "uCal" && bf){
+    bf.cal = ev.target.checked; $("bErr").textContent = "";
+    if(bf.cal && !$("bDate").value) $("bDate").value = dSel;
+    applyCal(); return;
+  }
   if(ev.target.id === "uBt" && bf){
     const on = ev.target.checked, nm = $("uName").value.trim(); bf.bt = on; $("bErr").textContent = "";
     if(on){ if(bf.icon === "🥤") bf.icon = "🧋"; if(!bf.drink && nm){ bf.drink = nm; bf.pickDrink = false; } }
@@ -1776,10 +1777,10 @@ $("importFile").onchange = async e => {
   const f = e.target.files[0]; e.target.value = ""; if(!f) return;
   try{
     const data = JSON.parse(await f.text());
-    const fromBt = e => ({id:"bt" + (e.id || newId("")), kind:"drink", icon:"🧋", shop:e.shop || "", name:e.drink || "", sugar:e.sugar || "", ice:e.ice || "", stars:e.stars || 0, note:e.note || "", date:e.date || ymd(new Date()), time:"", created:e.ts || Date.now()});
+    const fromBt = e => ({id:"bt" + (e.id || newId("")), kind:"drink", icon:"🧋", shop:e.shop || "", name:e.drink || "", sugar:e.sugar || "", ice:e.ice || "", stars:e.stars || 0, note:e.note || "", date:e.date || "", time:"", oncal:false, created:e.ts || Date.now()});
     const arr = Array.isArray(data) ? data : (data.items || (Array.isArray(data.entries) ? data.entries.map(fromBt) : null));
     if(!Array.isArray(arr)) throw 0;
-    const ok = arr.filter(x => x && x.id && (x.kind === "letter" || x.date));
+    const ok = arr.filter(x => x && x.id && (x.kind === "letter" || x.kind === "drink" || x.date));
     ok.forEach(x => {
       x.kind = x.kind || "note"; delete x.photo; delete x.photoRef;
       const i = items.findIndex(y => y.id === x.id); if(i >= 0) items[i] = x; else items.push(x);

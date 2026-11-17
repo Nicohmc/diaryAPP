@@ -1,5 +1,5 @@
-// 更新網站內容後，把下面的 v9 改成 v10、v11…，手機才會抓到新版
-const CACHE = "sd-v9";
+// 更新網站內容後，把下面的 v10 改成 v11、v12…，手機才會抓到新版
+const CACHE = "sd-v10";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
